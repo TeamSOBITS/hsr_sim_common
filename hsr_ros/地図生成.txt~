@@ -1,0 +1,42 @@
+<地図生成>
+
+1. $ roslaunch turtlebot_bringup minimal.launch
+でkobukiを立ち上げる。
+2. $ roslaunch turtlebot_rviz_launchers view_navigation.launch
+でRvizという作成した地図を可視化するアプリを実行する。
+3. $ roslaunch turtlebot_teleop keyboard_teleop.launch
+を起動して、キーボードでturtlebot本体を動かす。
+4. $ roslaunch turtlebot_navigation gmapping_demo.launch　
+を起動するとgmappingというカメラから情報を取り入れ、地図を作成するデモアプリを実行する。
+5. 指定位置はpoint pub　でx.y.z. クォータニオンは/tf確認する
+6. $ rosrun map_server map_saver -f /パス名/ファイル名 
+6.　$
+作成した地図の保存。
+7. 障害物のつけ消しはGIMPでやる
+8. 地図の追加はamcl.launchにする
+
+
+
+
+
+
+
+
+export ROS_MASTER_URI=http://127.0.0.1:11311
+export ROS_HOSTNAME=127.0.0.1
+export ROS_PACKAGE_PATH=/opt/ros/indigo/share/rospeex_msgs:$ROS_PACKAGE_PATH
+
+
+
+
+<作成した地図を保存する方法>
+以下のコマンドを入力してください.
+　$ rosrun map_server map_saver -f /パス名/ファイル名 
+<保存した地図を使用したナビゲーション>
+1 Turtlebotの電源を入れます.次にXtionとTurtlebotをUSBケーブルで接続してください.
+2 以下のコマンドを入力し、TurtlebotとPCとの接続を確認してください.
+　$ roslaunch turtlebot_bringup minimal.launch
+3 次に成した地図ファイルの中を通り抜けるナビゲーション用のデモアプリを実行してください.
+　$ roslaunch turtlebot_navigation amcl_demo.launch map_file:=/tmp/my_map.yaml
+4 最後にRvizという作成した地図を可視化するアプリを実行してください.
+　$ roslaunch turtlebot_rviz_launchers view_navigation.launch

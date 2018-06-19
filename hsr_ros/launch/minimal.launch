@@ -1,0 +1,16 @@
+<launch>
+
+	<include file="$(find hsr_ros)/launch/hsr_openni2.launch" />
+	<!--include file="$(find hsr_description)/robots/upload_hsrb.launch" /-->
+	<arg name="robot" default="hsrb4s" />
+	<param name="robot_description" command="$(find xacro)/xacro.py '$(find hsr_description)/robots/$(arg robot).urdf.xacro'" />
+
+	<!-- hsr_controller -->
+	<group ns = "robot_ctrl">
+		<node pkg="hsr_ros" type="hsr_controller.py" name="hsr_controller" output="screen"/>
+		<node pkg="hsr_ros" type="grasp_obj_by_frame_hsr.py" name="grasp_obj_by_frame" output="screen"/>
+	</group>
+
+	<!--node name="rviz" pkg="rviz" type="rviz" args="-d $(find hsr_ros)/rviz/display.rviz"/-->
+
+</launch>
