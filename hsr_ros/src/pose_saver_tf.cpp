@@ -49,8 +49,8 @@ public:
 		//tfで変換
 		tf::StampedTransform transform;
 
-		listener.waitForTransform("/odom","base_footprint",ros::Time(0),ros::Duration(3.0));
-		listener.lookupTransform("/odom","base_footprint",ros::Time(0),transform);
+		listener.waitForTransform("/map","base_footprint",ros::Time(0),ros::Duration(3.0));
+		listener.lookupTransform("/map","base_footprint",ros::Time(0),transform);
 
 		/*
 		std::cout<<"transform.getOrigine().x(): "<<transform.getOrigin().x()<<std::endl;
