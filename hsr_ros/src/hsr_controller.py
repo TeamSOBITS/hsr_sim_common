@@ -36,7 +36,7 @@ class OdomBaseController:
 		else:
 			if "T" in req.req_str:
 				self.order_deg = self.Read_Value(req)
-				rospy.loginfo("Base_ctrl: Trun: %f(deg)" % (self.order_deg))
+				rospy.loginfo("Base_ctrl: Turn: %f(deg)" % (self.order_deg))
 				send_twist = Twist()
 				if self.order_deg > 0:
 					send_twist.angular.z = 0.174533#deg2rad(10)
