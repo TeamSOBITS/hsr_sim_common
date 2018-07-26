@@ -17,3 +17,9 @@ ros-kinetic-roswww
 `chmod 755 install.sh`
 
 `sudo ./install.sh`
+
+以下も忘れずに。
+
+`roscd hsr_ros/src`
+
+`chmod 755 *`
