@@ -1,11 +1,17 @@
-【Turtlebot_EDUの使い方】
+# Common ROS package for HSR
+
 ロボットを動かすのに必要なPKGのインストールスクリプトがPKG内の直下にあります。
+
 下記のコマンドで必要な依存関係がインストールできます。
 
-roscd turtlebot_edu
+roscd hsr_ros
 chmod 755 install.sh
 sudo ./install.sh
 
-【変更必須箇所】
-src/pose_saver_tf.cpp
-39行目のユーザーネームを変更
+#dependency
+
+ros-kinetic-jsk-rviz-plugins
+
+ros-kinetic-rosbridge-suite
+
+ros-kinetic-roswww
