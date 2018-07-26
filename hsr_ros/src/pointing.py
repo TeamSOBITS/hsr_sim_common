@@ -34,6 +34,8 @@ class Pointing:
 		self.move_x = 0.0
 		self.move_y = 0.0
 
+		rospy.loginfo("Body_ctrl is OK.")
+
 	def Robot_motion(self, srv_msg):
 		target_motion = srv_msg.motion_type
 		rospy.loginfo("Robot_motion [%s]", target_motion)
