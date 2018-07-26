@@ -13,5 +13,7 @@ ros-kinetic-roswww
 下記のコマンドで必要な依存関係がすべてインストールできます。
 
 `roscd hsr_ros`
+
 `chmod 755 install.sh`
+
 `sudo ./install.sh`
