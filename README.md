@@ -8,7 +8,7 @@ roscd hsr_ros
 chmod 755 install.sh
 sudo ./install.sh
 
-#dependency
+## dependency
 
 ros-kinetic-jsk-rviz-plugins
 
