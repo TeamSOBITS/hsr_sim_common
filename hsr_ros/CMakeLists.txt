@@ -27,6 +27,7 @@ add_service_files(
  grasp_ctrl.srv
  waypoint_nav.srv
  robot_motion.srv
+ arm_height.srv
 )
 
 generate_messages(

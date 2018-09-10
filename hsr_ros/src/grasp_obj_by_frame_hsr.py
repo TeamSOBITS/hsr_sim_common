@@ -19,6 +19,7 @@ class Grasping:
 		self.pub_gripper_traj = rospy.Publisher("/hsrb/gripper_trajectory_controller/command", JointTrajectory, queue_size=10)
 		self.servise = rospy.Service('grasp_ctrl', grasp_ctrl, self.Grasp_by_frame)
 		self.servise = rospy.Service('motion_ctrl', robot_motion, self.Robot_motion)
+		self.servise = rospy.Service('arm_height', arm_height, self.Arm_height)
 		self.listener = tf.TransformListener()
 
 		# objectの座標値調整のパラメーター(cm)
@@ -36,6 +37,14 @@ class Grasping:
 		self.move_x = 0.0
 		self.move_y = 0.0
 
+	def Arm_height(self, srv_msg):
+		try:
+			(arm_trans, arm_rot) = self.listener.lookupTransform('/base_footprint','/hand_l_distal_link', rospy.Time(0))
+			rospy.loginfo("arm_height --> %f", arm_trans[2])
+			return arm_heightResponse(arm_trans[2])
+		except(tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+			rospy.logerr("arm_height -> TF lookup error")
+		
 	def Robot_motion(self, srv_msg):
 		target_motion = srv_msg.motion_type
 		rospy.loginfo("Robot_motion [%s]", target_motion)
@@ -155,7 +164,7 @@ class Grasping:
 		self.move_arm('arm_flex_joint', self.arm_flexup_val)
 		rospy.sleep(2)
 		self.base_ctrl_call('X:-50')
-		self.motion_initial_pose()
+		#self.motion_initial_pose()
 
 	def motion_pointing_pose(self):
 		self.move_hand_open(False)
