@@ -20,6 +20,7 @@ class Grasping:
 		self.servise = rospy.Service('grasp_ctrl', grasp_ctrl, self.Grasp_by_frame)
 		self.servise = rospy.Service('motion_ctrl', robot_motion, self.Robot_motion)
 		self.servise = rospy.Service('arm_height', arm_height, self.Arm_height)
+		self.servise = rospy.Service('put_ctrl', put_ctrl, self.Put_ctrl)
 		self.listener = tf.TransformListener()
 
 		# objectの座標値調整のパラメーター(cm)
@@ -44,6 +45,79 @@ class Grasping:
 			return arm_heightResponse(arm_trans[2])
 		except(tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
 			rospy.logerr("arm_height -> TF lookup error")
+		
+	def Put_ctrl(self, srv_msg):
+		height_designation = srv_msg.req_height * 100
+		self.target_position = srv_msg.req_str
+		if 34 <= height_designation and height_designation <= 103:# 腕を水平にして把持できる高さ範囲
+			self.arm_lift_val = (height_designation - 34) * 0.01 #m単位に変換
+			self.arm_flex_val = -1.5708 #deg2rad(-90)
+			self.arm_flexup_val = self.arm_flex_val + 0.2
+			self.wrist_flex_val = 0.0
+			self.move_x = self.param_grasp_depth - 71.5 #71.5はbase_footprintからfingerまでのx軸距離
+			#把持開始
+			self.put_motion()
+
+		elif height_designation < 34:
+			temp_val = 34.5 / (34 - height_designation)#armの角度算出
+			flex_angle = math.asin(temp_val)
+			base_finger_len = 37 + (34.5 * math.cos(flex_angle))
+			self.arm_lift_val = 0.0
+			self.arm_flex_val = -(1.5708 + flex_angle)
+			self.arm_flexup_val = self.arm_flex_val + 0.2
+			self.wrist_flex_val = flex_angle
+			self.move_x = self.param_grasp_depth - base_finger_len
+			if self.arm_flexup_val > 0:
+				self.arm_flexup_val = 0
+			#把持開始
+			self.put_motion()
+
+		elif height_designation > 103:
+			temp_val = 34.5 / (height_designation - 103)#armの角度算出
+			flex_angle = math.asin(temp_val)
+			base_finger_len = 37 + (34.5 * math.cos(flex_angle))
+			self.arm_lift_val = 0.69
+			self.arm_flex_val = -1.5708 + flex_angle
+			self.arm_flexup_val = self.arm_flex_val + 0.2
+			self.wrist_flex_val = -flex_angle
+			self.move_x = self.param_grasp_depth - base_finger_len
+			if self.arm_flexup_val > 0:
+				self.arm_flexup_val = 0
+			#把持開始
+			self.put_motion()
+		return put_ctrlResponse(True)
+	
+	def put_motion(self):
+	
+		self.move_head('head_pan_joint', 0.0)
+		self.move_head('head_tilt_joint', 0.0)
+		#arm移動
+		self.move_arm('arm_lift_joint', self.arm_lift_val)
+		rospy.sleep(3)
+		self.move_arm('arm_flex_joint', self.arm_flex_val)
+		self.move_arm('arm_roll_joint', self.arm_roll_val)
+		self.move_arm('wrist_flex_joint', self.wrist_flex_val)
+		rospy.sleep(3)
+		if not 'box' in self.target_position:
+			#直進して物体把持
+			self.base_ctrl_call('X:20')
+			rospy.sleep(0.5)
+			self.move_hand_open(True)
+			rospy.sleep(3)
+			#self.move_arm('arm_flex_joint', self.arm_flexup_val)
+			#rospy.sleep(2)
+			self.base_ctrl_call('X:-30')
+			rospy.sleep(2)
+			
+		else:
+			self.move_hand_open(True)
+			rospy.sleep(3)
+			#self.move_arm('arm_flex_joint', self.arm_flexup_val)
+			#rospy.sleep(2)
+			#self.base_ctrl_call('X:-30')
+			#rospy.sleep(2)
+		self.motion_initial_pose()
+
 		
 	def Robot_motion(self, srv_msg):
 		target_motion = srv_msg.motion_type
@@ -163,7 +237,7 @@ class Grasping:
 		rospy.sleep(2)
 		self.move_arm('arm_flex_joint', self.arm_flexup_val)
 		rospy.sleep(2)
-		self.base_ctrl_call('X:-50')
+		self.base_ctrl_call('X:-30')
 		#self.motion_initial_pose()
 
 	def motion_pointing_pose(self):
