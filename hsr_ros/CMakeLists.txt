@@ -46,7 +46,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(pose_saver_hsr src/pose_saver_tf.cpp)
+add_executable(pose_saver_hsr src/pose_saver.cpp)
 target_link_libraries(pose_saver_hsr ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 
 add_executable(waypoint_nav_hsr src/waypoint_nav.cpp)
