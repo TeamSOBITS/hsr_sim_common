@@ -21,6 +21,7 @@ class Grasping:
 		self.servise = rospy.Service('motion_ctrl', robot_motion, self.Robot_motion)
 		self.servise = rospy.Service('arm_height', arm_height, self.Arm_height)
 		self.servise = rospy.Service('put_ctrl', put_ctrl, self.Put_ctrl)
+		self.servise = rospy.Service('object_reach_ctrl', grasp_ctrl, self.Object_raech)
 		self.listener = tf.TransformListener()
 
 		# objectの座標値調整のパラメーター(cm)
@@ -203,7 +204,7 @@ class Grasping:
 			self.grasp_motion()
 
 		elif object_z > 103:
-			temp_val = 34.5 / (object_z - 103)#armの角度算出
+			temp_val = (object_z - 103) / 34.5 #armの角度算出
 			flex_angle = math.asin(temp_val)
 			base_finger_len = 37 + (34.5 * math.cos(flex_angle))
 			self.arm_lift_val = 0.69
@@ -239,6 +240,96 @@ class Grasping:
 		rospy.sleep(2)
 		self.base_ctrl_call('X:-30')
 		#self.motion_initial_pose()
+		
+			def Object_raech(self, srv_msg):
+
+		target_object = srv_msg.req_str
+		key = self.listener.canTransform('/base_footprint', target_object, rospy.Time(0))# 座標変換の可否判定
+		if key == False:
+			rospy.logerr("Grasp_ctrl Can't Transform [%s]", target_object)
+			return False
+
+		#物体把持の処理開始
+		rospy.loginfo("Grasp_ctrl Target_object [%s]", target_object)
+		(trans,rot) = self.listener.lookupTransform('/base_footprint', target_object, rospy.Time(0))
+		print trans
+		# 物体座標(cm)
+		object_x = (trans[0] * 100) + self.param_object_x
+		object_y = (trans[1] * 100) + self.param_object_y
+		object_z = (trans[2] * 100) + self.param_object_z
+
+		print object_x
+		print object_y
+		print object_z
+
+		if 34 <= object_z and object_z <= 103:# 腕を水平にして把持できる高さ範囲
+			object_z += 5
+			object_x -= 5
+			self.arm_lift_val = (object_z - 34) * 0.01 #m単位に変換
+			self.arm_flex_val = -1.5708 #deg2rad(-90)
+			self.arm_flexup_val = self.arm_flex_val + 0.2
+			self.wrist_flex_val = 0.0
+			self.move_x = (object_x + self.param_grasp_depth - 71.5) #71.5はbase_footprintからfingerまでのx軸距離
+			self.move_y = (object_y - 7.8) #7.8はbase_footprintからfingerまでのy軸距離
+			#把持開始
+			self.reach_motion()
+
+		elif object_z < 34:
+			object_x -= 5
+			if object_z < 5.0:
+				object_z = 5.0
+			object_y = 0
+			print "object_z: " , object_z
+			temp_val = (34 - object_z) / 34.5 #armの角度算出
+			print "temp_val : " , temp_val
+			flex_angle = math.asin(temp_val)
+			base_finger_len = 37 + (34.5 * math.cos(flex_angle))
+			self.arm_lift_val = 0.0
+			self.arm_flex_val = -(1.5708 + flex_angle)
+			self.arm_flexup_val = self.arm_flex_val + 0.2
+			self.wrist_flex_val = flex_angle
+			self.move_x = (object_x + self.param_grasp_depth - base_finger_len)
+			self.move_y = (object_y - 7.8) #7.8はbase_footprintからfingerまでのy軸距離
+			if self.arm_flexup_val > 0:
+				self.arm_flexup_val = 0
+			#把持開始
+			self.reach_motion()
+
+		elif object_z > 103:
+			print "object_z: " , object_z
+			temp_val = (object_z - 103) / 34.5 #armの角度算出
+			print "temp_val : " , temp_val
+			flex_angle = math.asin(temp_val)
+			base_finger_len = 37 + (34.5 * math.cos(flex_angle))
+			self.arm_lift_val = 0.69
+			self.arm_flex_val = -1.5708 + flex_angle
+			self.arm_flexup_val = self.arm_flex_val + 0.2
+			self.wrist_flex_val = -flex_angle
+			self.move_x = (object_x + self.param_grasp_depth - base_finger_len)
+			self.move_y = (object_y - 7.8) #7.8はbase_footprintからfingerまでのy軸距離
+			if self.arm_flexup_val > 0:
+				self.arm_flexup_val = 0
+			#把持開始
+			self.reach_motion()
+		return grasp_ctrlResponse(True)
+
+
+	def reach_motion(self):
+		#手を開いて横移動
+		self.move_hand_open(True)
+		self.move_arm('arm_lift_joint', 0.5)
+		self.base_ctrl_call('X:' + str(self.move_x - 20))
+		self.base_ctrl_call('Y:' + str(self.move_y))
+		#arm移動
+		self.move_arm('arm_lift_joint', self.arm_lift_val)
+		rospy.sleep(1)
+		self.move_arm('arm_flex_joint', self.arm_flex_val)
+		self.move_arm('arm_roll_joint', self.arm_roll_val)
+		self.move_arm('wrist_flex_joint', self.wrist_flex_val)
+		rospy.sleep(3)
+		#直進して物体把持
+		self.base_ctrl_call('X:20')
+		self.move_hand_open(False)
 
 	def motion_pointing_pose(self):
 		self.move_hand_open(False)
