@@ -29,6 +29,7 @@ add_service_files(
  robot_motion.srv
  arm_height.srv
  put_ctrl.srv
+ detect_ctrl.srv
 )
 
 generate_messages(

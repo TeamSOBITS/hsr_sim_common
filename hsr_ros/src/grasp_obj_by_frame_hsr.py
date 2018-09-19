@@ -21,6 +21,7 @@ class Grasping:
 		self.servise = rospy.Service('motion_ctrl', robot_motion, self.Robot_motion)
 		self.servise = rospy.Service('arm_height', arm_height, self.Arm_height)
 		self.servise = rospy.Service('put_ctrl', put_ctrl, self.Put_ctrl)
+		self.servise = rospy.Service('detect_ctrl', detect_ctrl, self.Detect_ctrl)
 		self.servise = rospy.Service('object_reach_ctrl', grasp_ctrl, self.Object_raech)
 		self.listener = tf.TransformListener()
 
@@ -46,6 +47,20 @@ class Grasping:
 			return arm_heightResponse(arm_trans[2])
 		except(tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
 			rospy.logerr("arm_height -> TF lookup error")
+	
+	def Detect_ctrl(self, srv_msg):
+		detect_height = (0.173205 + srv_msg.req_height - 0.752) * 2 
+		print 'DETECTING_POSEの高さ：　', detect_height
+		self.move_head('head_pan_joint', 0.0)
+		self.move_head('head_tilt_joint', -0.5233)#-30度
+		self.move_arm('arm_lift_joint', 0.6)
+		rospy.sleep(2)
+		self.move_arm('arm_flex_joint', -2.62)
+		self.move_arm('arm_roll_joint', -1.5708) #deg2rad(-90)
+		self.move_arm('wrist_flex_joint', -1.5708) #deg2rad(-90)
+		rospy.sleep(2)
+		self.move_arm('arm_lift_joint', detect_height)
+		return detect_ctrlResponse(True)
 		
 	def Put_ctrl(self, srv_msg):
 		height_designation = srv_msg.req_height * 100
@@ -241,7 +256,7 @@ class Grasping:
 		self.base_ctrl_call('X:-30')
 		#self.motion_initial_pose()
 		
-			def Object_raech(self, srv_msg):
+	def Object_raech(self, srv_msg):
 
 		target_object = srv_msg.req_str
 		key = self.listener.canTransform('/base_footprint', target_object, rospy.Time(0))# 座標変換の可否判定
