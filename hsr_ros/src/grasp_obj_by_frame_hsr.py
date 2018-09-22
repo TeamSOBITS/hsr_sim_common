@@ -47,9 +47,12 @@ class Grasping:
 			return arm_heightResponse(arm_trans[2])
 		except(tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
 			rospy.logerr("arm_height -> TF lookup error")
+			return -1
 	
 	def Detect_ctrl(self, srv_msg):
-		detect_height = (0.173205 + srv_msg.req_height - 0.752) * 2 
+		detect_height = (0.173205 + srv_msg.req_height - 0.752) * 2 #0.752を通常のbase_footprintからcameraのz軸距離、0.173205は家具まで高さが30cm時、見る角度が-30度の時のz軸
+		if detect_height < 0.2:
+			detect_height = 0.2
 		print 'DETECTING_POSEの高さ：　', detect_height
 		self.move_head('head_pan_joint', 0.0)
 		self.move_head('head_tilt_joint', -0.5233)#-30度
@@ -60,8 +63,10 @@ class Grasping:
 		self.move_arm('wrist_flex_joint', -1.5708) #deg2rad(-90)
 		rospy.sleep(2)
 		self.move_arm('arm_lift_joint', detect_height)
+		if detect_height == 0.2:
+			return detect_ctrlResponse(False)
 		return detect_ctrlResponse(True)
-		
+
 	def Put_ctrl(self, srv_msg):
 		height_designation = srv_msg.req_height * 100
 		self.target_position = srv_msg.req_str
