@@ -3,7 +3,9 @@
 	<include file="$(find hsr_ros)/launch/hsr_openni2.launch" />
 	<!--include file="$(find hsr_description)/robots/upload_hsrb.launch" /-->
 	<arg name="robot" default="hsrb4s" />
-	<param name="robot_description" command="$(find xacro)/xacro.py '$(find hsr_description)/robots/$(arg robot).urdf.xacro'" />
+	
+	<!-- <param name="robot_description" command="$(find xacro)/xacro.py '$(find hsr_description)/robots/$(arg robot).urdf.xacro'" /> -->
+	<param name="robot_description" textfile="$(find hsr_description)/robots/hsrb4s.urdf" />
 
 	<!-- hsr_controller -->
 	<group ns = "robot_ctrl">
