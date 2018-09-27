@@ -209,7 +209,7 @@ class Grasping:
 			self.grasp_motion()
 
 		elif object_z < 34:
-			temp_val = 34.5 / (34 - object_z)#armの角度算出
+			temp_val = (34 - object_z) / 34.5#armの角度算出
 			flex_angle = math.asin(temp_val)
 			base_finger_len = 37 + (34.5 * math.cos(flex_angle))
 			self.arm_lift_val = 0.0
