@@ -80,7 +80,7 @@ class Grasping:
 			self.put_motion()
 
 		elif height_designation < 34:
-			temp_val = 34.5 / (34 - height_designation)#armの角度算出
+			temp_val = (34 - height_designation) / 34.5#armの角度算出
 			flex_angle = math.asin(temp_val)
 			base_finger_len = 37 + (34.5 * math.cos(flex_angle))
 			self.arm_lift_val = 0.0
@@ -152,6 +152,8 @@ class Grasping:
 			self.motion_detect_pose()
 		elif target_motion == 'POINTING_POSE':
 			self.motion_pointing_pose()
+		elif target_motion == 'MESUREMENT_POSE':
+			self.motion_mesurement_pose()
 
 		elif target_motion == 'CAMERA_TILT_UP':
 			self.move_head('head_tilt_joint', 0.25)
@@ -350,6 +352,13 @@ class Grasping:
 		#直進して物体把持
 		self.base_ctrl_call('X:20')
 		self.move_hand_open(False)
+
+	def motion_mesurement_pose(self):
+		self.move_arm('arm_roll_joint', 3.14)
+		self.move_head('head_tilt_joint', -0.2)
+		self.move_arm('arm_lift_joint', 0.0)
+		self.move_arm('arm_flex_joint', -1.0)
+		self.move_arm('wrist_flex_joint', -0.8)
 
 	def motion_pointing_pose(self):
 		self.move_hand_open(False)

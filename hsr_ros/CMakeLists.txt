@@ -30,6 +30,7 @@ add_service_files(
  arm_height.srv
  put_ctrl.srv
  detect_ctrl.srv
+ object_depth.srv
 )
 
 generate_messages(
