@@ -31,6 +31,7 @@ add_service_files(
  put_ctrl.srv
  detect_ctrl.srv
  object_depth.srv
+ watch_motion.srv
 )
 
 generate_messages(

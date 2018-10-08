@@ -23,13 +23,14 @@ class Grasping:
 		self.servise = rospy.Service('put_ctrl', put_ctrl, self.Put_ctrl)
 		self.servise = rospy.Service('detect_ctrl', detect_ctrl, self.Detect_ctrl)
 		self.servise = rospy.Service('object_reach_ctrl', grasp_ctrl, self.Object_raech)
+		self.servise = rospy.Service('watch_motion', watch_motion, self.Wath_motion)
 		self.listener = tf.TransformListener()
 
 		# objectの座標値調整のパラメーター(cm)
 		self.param_object_x = 0.0# +-前後
 		self.param_object_y = 0.0# +-左右
 		self.param_object_z = 0.0# +-上下
-		self.param_grasp_depth = 5.0# 手で物体を握る深さ
+		self.param_grasp_depth = 3.0# 手で物体を握る深さ
 
 		#物体把持時に使用する変数
 		self.arm_lift_val = 0.0
@@ -39,7 +40,30 @@ class Grasping:
 		self.wrist_flex_val = 0.0
 		self.move_x = 0.0
 		self.move_y = 0.0
-
+	
+	def Wath_motion(self, srv_msg):
+		try:
+			print srv_msg.req_str
+			(trans, rot) = self.listener.lookupTransform('/base_footprint',srv_msg.req_str, rospy.Time(0))
+			x = trans[0] - 0.060
+			print x
+			y = trans[1] + 0.022
+			print y
+			z = 0.967 - trans[2]
+			print z
+			if x < 0:
+				rospy.loginfo('向くことができません。')
+				return watch_motionResponse(False)
+			rad_pan = math.atan(y / x)
+			rad_tilt = - math.atan(z / math.sqrt(x ** 2 + y ** 2))
+			print 'head_pan_joint    :', rad_pan
+			print 'head_tilt_joint    :', rad_tilt
+			self.move_head('head_pan_joint', rad_pan)
+			self.move_head('head_tilt_joint', rad_tilt)
+			return watch_motionResponse(True)
+		except(tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+			rospy.logerr("watch_motion -> TF lookup error")
+			return watch_motionResponse(False)
 	def Arm_height(self, srv_msg):
 		try:
 			(arm_trans, arm_rot) = self.listener.lookupTransform('/base_footprint','/hand_l_distal_link', rospy.Time(0))
@@ -119,24 +143,16 @@ class Grasping:
 		self.move_arm('arm_roll_joint', self.arm_roll_val)
 		self.move_arm('wrist_flex_joint', self.wrist_flex_val)
 		rospy.sleep(3)
-		if not 'box' in self.target_position:
-			#直進して物体把持
-			self.base_ctrl_call('X:20')
-			rospy.sleep(0.5)
-			self.move_hand_open(True)
-			rospy.sleep(3)
-			#self.move_arm('arm_flex_joint', self.arm_flexup_val)
-			#rospy.sleep(2)
-			self.base_ctrl_call('X:-30')
-			rospy.sleep(2)
-			
-		else:
-			self.move_hand_open(True)
-			rospy.sleep(3)
-			#self.move_arm('arm_flex_joint', self.arm_flexup_val)
-			#rospy.sleep(2)
-			#self.base_ctrl_call('X:-30')
-			#rospy.sleep(2)
+		#直進して物体把持
+		self.base_ctrl_call('X:20')
+		rospy.sleep(0.5)
+		self.move_hand_open(True)
+		rospy.sleep(3)
+		#self.move_arm('arm_flex_joint', self.arm_flexup_val)
+		#rospy.sleep(2)
+		self.base_ctrl_call('X:-30')
+		rospy.sleep(2)
+		
 		self.motion_initial_pose()
 
 		
