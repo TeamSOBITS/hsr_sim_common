@@ -263,9 +263,9 @@ class Grasping:
 		#手を開いて横移動
 		#self.move_hand_open(True)
 		#self.move_arm('arm_lift_joint', 0.5)
-		if(self.move_x > 1):#1cmより大きい場合のみ動く
+		if abs(self.move_x) > 1:#1cmより大きい場合のみ動く
 			self.base_ctrl_call('X:' + str(self.move_x))
-		if(self.move_y > 1):#1cmより大きい場合のみ動く
+		if abs(self.move_y) > 1:#1cmより大きい場合のみ動く
 			self.base_ctrl_call('Y:' + str(self.move_y))
 		#arm移動
 		self.move_arm('arm_lift_joint', self.arm_lift_val)
