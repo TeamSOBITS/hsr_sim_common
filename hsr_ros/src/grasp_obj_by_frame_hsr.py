@@ -24,6 +24,9 @@ class Grasping:
 		self.servise = rospy.Service('detect_ctrl', detect_ctrl, self.Detect_ctrl)
 		self.servise = rospy.Service('object_reach_ctrl', grasp_ctrl, self.Object_raech)
 		self.servise = rospy.Service('watch_motion', watch_motion, self.Wath_motion)
+		self.servise = rospy.Service('gripper_move', gripper_move, self.Gripper_move)
+		self.servise = rospy.Service('gripper_open', gripper_ctrl, self.Gripper_open)
+		self.servise = rospy.Service('gripper_close', gripper_ctrl, self.Gripper_close)
 		self.listener = tf.TransformListener()
 
 		# objectの座標値調整のパラメーター(cm)
@@ -40,7 +43,7 @@ class Grasping:
 		self.wrist_flex_val = 0.0
 		self.move_x = 0.0
 		self.move_y = 0.0
-	
+
 	def Wath_motion(self, srv_msg):
 		try:
 			print srv_msg.req_str
@@ -72,7 +75,7 @@ class Grasping:
 		except(tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
 			rospy.logerr("arm_height -> TF lookup error")
 			return -1
-	
+
 	def Detect_ctrl(self, srv_msg):
 		detect_height = (0.173205 + srv_msg.req_height - 0.752) * 2 #0.752を通常のbase_footprintからcameraのz軸距離、0.173205は家具まで高さが30cm時、見る角度が-30度の時のz軸
 		if detect_height < 0.2:
@@ -131,9 +134,9 @@ class Grasping:
 			#把持開始
 			self.put_motion()
 		return put_ctrlResponse(True)
-	
+
 	def put_motion(self):
-	
+
 		self.move_head('head_pan_joint', 0.0)
 		self.move_head('head_tilt_joint', 0.0)
 		#arm移動
@@ -152,10 +155,10 @@ class Grasping:
 		#rospy.sleep(2)
 		self.base_ctrl_call('X:-30')
 		rospy.sleep(2)
-		
+
 		self.motion_initial_pose()
 
-		
+
 	def Robot_motion(self, srv_msg):
 		target_motion = srv_msg.motion_type
 		rospy.loginfo("Robot_motion [%s]", target_motion)
@@ -196,7 +199,6 @@ class Grasping:
 
 
 	def Grasp_by_frame(self, srv_msg):
-
 		target_object = srv_msg.req_str
 		key = self.listener.canTransform('/base_footprint', target_object, rospy.Time(0))# 座標変換の可否判定
 		if key == False:
@@ -259,9 +261,9 @@ class Grasping:
 
 	def grasp_motion(self):
 		#手を開いて横移動
-		self.move_hand_open(True)
+		#self.move_hand_open(True)
 		self.move_arm('arm_lift_joint', 0.5)
-		self.base_ctrl_call('X:' + str(self.move_x - 20))
+		self.base_ctrl_call('X:' + str(self.move_x))
 		self.base_ctrl_call('Y:' + str(self.move_y))
 		#arm移動
 		self.move_arm('arm_lift_joint', self.arm_lift_val)
@@ -271,14 +273,8 @@ class Grasping:
 		self.move_arm('wrist_flex_joint', self.wrist_flex_val)
 		rospy.sleep(3)
 		#直進して物体把持
-		self.base_ctrl_call('X:20')
-		self.move_hand_open(False)
-		rospy.sleep(2)
-		self.move_arm('arm_flex_joint', self.arm_flexup_val)
-		rospy.sleep(2)
-		self.base_ctrl_call('X:-30')
-		#self.motion_initial_pose()
-		
+		#self.base_ctrl_call('X:20')
+
 	def Object_raech(self, srv_msg):
 
 		target_object = srv_msg.req_str
@@ -351,6 +347,81 @@ class Grasping:
 			self.reach_motion()
 		return grasp_ctrlResponse(True)
 
+	def Gripper_move(self, srv_msg):
+		target_object = srv_msg.target_name
+		key = self.listener.canTransform('/base_footprint', target_object, rospy.Time(0))# 座標変換の可否判定
+		if key == False:
+			rospy.logerr("Grasp_ctrl Can't Transform [%s]", target_object)
+			return gripper_moveResponse(False)
+		#物体把持の処理開始
+		rospy.loginfo("Grasp_ctrl Target_object [%s]", target_object)
+		(trans,rot) = self.listener.lookupTransform('/base_footprint', target_object, rospy.Time(0))
+		print trans
+		object_x = (trans[0] * 100) + srv_msg.distance.x * 100
+		object_y = (trans[1] * 100) + srv_msg.distance.y * 100
+		object_z = (trans[2] * 100) + srv_msg.distance.z * 100
+		if 34 <= object_z and object_z <= 103:# 腕を水平にして把持できる高さ範囲
+			self.arm_lift_val = (object_z - 34) * 0.01 #m単位に変換
+			self.arm_flex_val = -1.5708 #deg2rad(-90)
+			self.arm_flexup_val = self.arm_flex_val + 0.2
+			self.wrist_flex_val = 0.0
+			self.move_x = (object_x + self.param_grasp_depth - 71.5) #71.5はbase_footprintからfingerまでのx軸距離
+			self.move_y = (object_y - 7.8) #7.8はbase_footprintからfingerまでのy軸距離
+			#把持開始
+			self.grasp_motion()
+		elif object_z < 34:
+			temp_val = (34 - object_z) / 34.5#armの角度算出
+			flex_angle = math.asin(temp_val)
+			base_finger_len = 37 + (34.5 * math.cos(flex_angle))
+			self.arm_lift_val = 0.0
+			self.arm_flex_val = -(1.5708 + flex_angle)
+			self.arm_flexup_val = self.arm_flex_val + 0.2
+			self.wrist_flex_val = flex_angle
+			self.move_x = (object_x + self.param_grasp_depth - base_finger_len)
+			self.move_y = (object_y - 7.8) #7.8はbase_footprintからfingerまでのy軸距離
+			if self.arm_flexup_val > 0:
+			  self.arm_flexup_val = 0
+			#把持開始
+			self.grasp_motion()
+		elif object_z > 103:
+			temp_val = (object_z - 103) / 34.5 #armの角度算出
+			flex_angle = math.asin(temp_val)
+			base_finger_len = 37 + (34.5 * math.cos(flex_angle))
+			self.arm_lift_val = 0.69
+			self.arm_flex_val = -1.5708 + flex_angle
+			self.arm_flexup_val = self.arm_flex_val + 0.2
+			self.wrist_flex_val = -flex_angle
+			self.move_x = (object_x + self.param_grasp_depth - base_finger_len)
+			self.move_y = (object_y - 7.8) #7.8はbase_footprintからfingerまでのy軸距離
+			if self.arm_flexup_val > 0:
+				self.arm_flexup_val = 0
+			#把持開始
+			self.grasp_motion()
+		return gripper_moveResponse(True)
+
+	def Gripper_open(self, srv_msg):
+		point = JointTrajectoryPoint()
+		point.time_from_start = rospy.Duration(2)
+		point.positions = [+0.611, -0.611]
+
+		send_data = JointTrajectory()
+		send_data.joint_names = ['hand_l_proximal_joint', 'hand_r_proximal_joint']
+		send_data.points.append(point)
+		#send_dataを送信
+		self.pub_gripper_traj.publish(send_data)
+		return True
+
+	def Gripper_close(self, srv_msg):
+		point = JointTrajectoryPoint()
+		point.time_from_start = rospy.Duration(2)
+		point.positions = [-0.05, +0.05]
+
+		send_data = JointTrajectory()
+		send_data.joint_names = ['hand_l_proximal_joint', 'hand_r_proximal_joint']
+		send_data.points.append(point)
+		#send_dataを送信
+		self.pub_gripper_traj.publish(send_data)
+		return True
 
 	def reach_motion(self):
 		#手を開いて横移動
