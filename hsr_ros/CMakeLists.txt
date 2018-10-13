@@ -32,6 +32,8 @@ add_service_files(
  detect_ctrl.srv
  object_depth.srv
  watch_motion.srv
+ gripper_move.srv
+ gripper_ctrl.srv
 )
 
 generate_messages(
