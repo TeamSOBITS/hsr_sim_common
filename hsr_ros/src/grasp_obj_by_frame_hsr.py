@@ -266,12 +266,13 @@ class Grasping:
 	def grasp_motion(self):
 		#手を開いて横移動
 		#self.move_hand_open(True)
-		self.move_arm('arm_lift_joint', 0.5)
-		self.base_ctrl_call('X:' + str(self.move_x))
-		self.base_ctrl_call('Y:' + str(self.move_y))
+		#self.move_arm('arm_lift_joint', 0.5)
+		if abs(self.move_x) > 1:#1cmより大きい場合のみ動く
+			self.base_ctrl_call('X:' + str(self.move_x))
+		if abs(self.move_y) > 1:#1cmより大きい場合のみ動く
+			self.base_ctrl_call('Y:' + str(self.move_y))
 		#arm移動
 		self.move_arm('arm_lift_joint', self.arm_lift_val)
-		rospy.sleep(1)
 		self.move_arm('arm_flex_joint', self.arm_flex_val)
 		self.move_arm('arm_roll_joint', self.arm_roll_val)
 		self.move_arm('wrist_flex_joint', self.wrist_flex_val)
@@ -355,10 +356,10 @@ class Grasping:
 		target_object = srv_msg.target_name
 		key = self.listener.canTransform('/base_footprint', target_object, rospy.Time(0))# 座標変換の可否判定
 		if key == False:
-			rospy.logerr("Grasp_ctrl Can't Transform [%s]", target_object)
+			rospy.logerr("Gripper_move Can't Transform [%s]", target_object)
 			return gripper_moveResponse(False)
 		#物体把持の処理開始
-		rospy.loginfo("Grasp_ctrl Target_object [%s]", target_object)
+		rospy.loginfo("Gripper_move Target_object [%s]", target_object)
 		(trans,rot) = self.listener.lookupTransform('/base_footprint', target_object, rospy.Time(0))
 		print trans
 		object_x = (trans[0] * 100) + srv_msg.distance.x * 100
@@ -405,7 +406,7 @@ class Grasping:
 
 	def Gripper_open(self, srv_msg):
 		point = JointTrajectoryPoint()
-		point.time_from_start = rospy.Duration(2)
+		point.time_from_start = rospy.Duration(1)
 		point.positions = [+0.611, -0.611]
 
 		send_data = JointTrajectory()
@@ -417,7 +418,7 @@ class Grasping:
 
 	def Gripper_close(self, srv_msg):
 		point = JointTrajectoryPoint()
-		point.time_from_start = rospy.Duration(2)
+		point.time_from_start = rospy.Duration(1)
 		point.positions = [-0.05, +0.05]
 
 		send_data = JointTrajectory()
