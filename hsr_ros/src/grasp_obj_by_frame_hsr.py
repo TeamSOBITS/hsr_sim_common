@@ -165,6 +165,10 @@ class Grasping:
 
 		if target_motion == 'INITIAL_POSE':
 			self.motion_initial_pose()
+		elif target_motion == 'LIFT_HIGH_POSE':
+			self.motion_high_pose()
+		elif target_motion == 'LIFT_MIDDLE_POSE':
+			self.motion_middle_pose()
 		elif target_motion == 'PUT_OBJECT_MOTION':
 			self.motion_put_object()
 		elif target_motion == 'DETECTING_POSE':
@@ -464,6 +468,24 @@ class Grasping:
 		self.move_arm('arm_flex_joint', 0.0)
 		self.move_arm('arm_roll_joint', -1.5708) #deg2rad(-90)
 		self.move_arm('wrist_flex_joint', -1.5708) #deg2rad(-90)
+
+	def motion_high_pose(self):
+		self.move_hand_open(False)
+		rospy.sleep(1)
+		self.move_head('head_pan_joint', 0.0)
+		rospy.sleep(1)
+		self.move_arm('arm_lift_joint', 0.8)
+		rospy.sleep(1)
+		self.move_arm('arm_roll_joint', -1.5708) #deg2rad(-90)
+
+	def motion_middle_pose(self):
+		self.move_hand_open(False)
+		rospy.sleep(1)
+		self.move_head('head_pan_joint', 0.0)
+		rospy.sleep(1)
+		self.move_arm('arm_lift_joint', 0.2)
+		rospy.sleep(1)
+		self.move_arm('arm_roll_joint', -1.5708) #deg2rad(-90)
 
 	def motion_put_object(self):
 		self.move_head('head_pan_joint', 0.0)
