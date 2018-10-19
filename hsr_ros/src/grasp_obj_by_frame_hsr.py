@@ -471,8 +471,6 @@ class Grasping:
 		self.move_arm('wrist_flex_joint', -1.5708) #deg2rad(-90)
 
 	def motion_high_pose(self):
-		self.move_hand_open(False)
-		rospy.sleep(1)
 		self.move_head('head_pan_joint', 0.0)
 		rospy.sleep(1)
 		self.move_arm('arm_lift_joint', 0.8)
@@ -480,8 +478,6 @@ class Grasping:
 		self.move_arm('arm_roll_joint', -1.5708) #deg2rad(-90)
 
 	def motion_middle_pose(self):
-		self.move_hand_open(False)
-		rospy.sleep(1)
 		self.move_head('head_pan_joint', 0.0)
 		rospy.sleep(1)
 		self.move_arm('arm_lift_joint', 0.2)
