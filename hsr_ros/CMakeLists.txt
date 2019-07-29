@@ -34,6 +34,7 @@ add_service_files(
  watch_motion.srv
  gripper_move.srv
  gripper_ctrl.srv
+ is_grasped.srv
 )
 
 generate_messages(

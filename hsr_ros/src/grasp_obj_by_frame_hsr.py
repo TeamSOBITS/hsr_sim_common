@@ -513,15 +513,14 @@ class Grasping:
 		self.motion_initial_pose()
 
 	def motion_detect_pose(self):
-		self.move_head('head_pan_joint', 0.0)
+		self.move_head('head_pan_joint', -0.50)
 		self.move_head('head_tilt_joint', -0.58)
-		self.move_arm('arm_lift_joint', 0.6)
-		rospy.sleep(2)
-		self.move_arm('arm_flex_joint', -2.62)
-		self.move_arm('arm_roll_joint', -1.5708) #deg2rad(-90)
+		self.move_arm('arm_lift_joint', 0.35)
+		self.move_arm('arm_flex_joint', -0.23)
+		self.move_arm('arm_roll_joint', 1.5708) #deg2rad(-90)
 		self.move_arm('wrist_flex_joint', -1.5708) #deg2rad(-90)
+		self.move_arm('wrist_roll_joint', 0.0) #deg2rad(-90)
 		rospy.sleep(2)
-		self.move_arm('arm_lift_joint', 0.45)
 
 	def move_head(self, joint_name, value):
 		point = JointTrajectoryPoint()
