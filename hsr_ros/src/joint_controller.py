@@ -199,6 +199,8 @@ class JointController:
             self.move_to_initial_pose()
         elif motion_type == "DETECTING_POSE":
             self.move_to_detecting_pose()
+        elif motion_type == "MEASUREMENT_POSE":
+            self.move_to_measurement_pose()
 
         return robot_motionResponse(True)
 
@@ -238,6 +240,18 @@ class JointController:
         self.move_wheel("T:29")
         rospy.sleep(1.0)
 
+    def move_to_measurement_pose(self):
+        time_from_start_sec = 1.0
+        self.add_head_control_data_to_storage('head_pan_joint', 0.0)
+        self.add_head_control_data_to_storage('head_tilt_joint', -0.2)#-0.2
+        self.add_arm_control_data_to_storage('arm_lift_joint', 0.0)
+        self.add_arm_control_data_to_storage('arm_flex_joint', -1.0)
+        self.add_arm_control_data_to_storage('arm_roll_joint', 3.14)
+        self.add_arm_control_data_to_storage('wrist_flex_joint', -0.8)
+        self.add_arm_control_data_to_storage('wrist_roll_joint', 0)
+        self.publish_head_control_data(time_from_start_sec)
+        self.publish_arm_control_data(time_from_start_sec)
+        rospy.sleep(1.0)
 
 if __name__ == "__main__":
     rospy.init_node("joint_controller")

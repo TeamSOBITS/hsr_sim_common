@@ -12,6 +12,8 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_conversions
   pcl_ros
   tf
+  tf2
+  tf2_ros
   message_generation
   sensor_msgs
 )
@@ -35,6 +37,7 @@ add_service_files(
  gripper_move.srv
  gripper_ctrl.srv
  is_grasped.srv
+ obj_depth.srv
 )
 
 generate_messages(
@@ -58,3 +61,6 @@ target_link_libraries(pose_saver_hsr ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 add_executable(waypoint_nav_hsr src/waypoint_nav.cpp)
 target_link_libraries(waypoint_nav_hsr ${catkin_LIBRARIES})
 add_dependencies(waypoint_nav_hsr ${PROJECT_NAME}_generate_messages_cpp)
+
+add_executable(sub_obj_depth src/sub_obj_depth.cpp)
+target_link_libraries(sub_obj_depth ${catkin_LIBRARIES})
