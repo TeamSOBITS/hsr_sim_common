@@ -32,7 +32,6 @@ add_service_files(
  arm_height.srv
  put_ctrl.srv
  detect_ctrl.srv
- object_depth.srv
  watch_motion.srv
  gripper_move.srv
  gripper_ctrl.srv
