@@ -92,8 +92,9 @@ class object_depth_class{
       ROS_INFO("service called");
       this->pub_filterd_flug = req.request;
       //this->sub = nh.subscribe(this->topic_name,1, &object_depth_class::depth_cb, this);
-      res.x = fabs(this->max_pt.x) + fabs(this->min_pt.x);
-      if (max_pt.x > 0) res.x = fabs(this->min_pt.x);
+      //res.x = fabs(this->max_pt.x) + fabs(this->min_pt.x);
+      //if (max_pt.x > 0) res.x = fabs(this->min_pt.x);
+      res.x = fabs(this->min_pt.x);
       res.y = fabs(this->max_pt.y) + fabs(this->min_pt.y);
       res.z = fabs(this->max_pt.z) + fabs(this->min_pt.z);
 
