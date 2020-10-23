@@ -202,7 +202,7 @@ class JointController:
         elif motion_type == "DETECTING_POSE2":
             self.move_to_detecting_pose2()
         elif motion_type == "DETECTING_BOX_POSE":
-            self.move_to_detecting_pose2()
+            self.move_to_detecting_box_pose()
         elif motion_type == "MEASUREMENT_POSE":
             self.move_to_measurement_pose()
 
