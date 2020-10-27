@@ -205,6 +205,8 @@ class JointController:
             self.move_to_detecting_box_pose()
         elif motion_type == "MEASUREMENT_POSE":
             self.move_to_measurement_pose()
+        elif motion_type == "PERSON_DETECT_POSE":
+            self.move_to_person_detect_pose()
 
         return robot_motionResponse(True)
 
@@ -282,6 +284,20 @@ class JointController:
         self.add_arm_control_data_to_storage('wrist_roll_joint', 0)
         self.publish_head_control_data(time_from_start_sec)
         self.publish_arm_control_data(time_from_start_sec)
+        rospy.sleep(1.0)
+
+    def move_to_person_detect_pose(self):
+        time_from_start_sec = 1.0
+        self.add_head_control_data_to_storage('head_pan_joint', 0.0)
+        self.add_head_control_data_to_storage('head_tilt_joint', 0.0)
+        self.add_arm_control_data_to_storage('arm_lift_joint', 0.0)
+        self.add_arm_control_data_to_storage('arm_flex_joint', 0.0)
+        self.add_arm_control_data_to_storage('arm_roll_joint',  -1.5708)
+        self.add_arm_control_data_to_storage('wrist_flex_joint',  -1.5708)
+        self.add_arm_control_data_to_storage('wrist_roll_joint', 0.0)
+        self.publish_head_control_data(time_from_start_sec)
+        self.publish_arm_control_data(time_from_start_sec)
+        self.move_wheel("T:35")
         rospy.sleep(1.0)
 
 if __name__ == "__main__":
