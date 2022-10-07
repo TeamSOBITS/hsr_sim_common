@@ -105,12 +105,18 @@ class JointController:
         object_x_cm = (trans[0] + req_msg.shift.x) * 100
         object_y_cm = (trans[1] + req_msg.shift.y) * 100
         object_z_cm = (trans[2] + req_msg.shift.z + 0.8269999) * 100
+
+        print ("TRANS")
+        print (trans[0], trans[1], trans[2])
+        print ("OBJECT XYZ")
+        print (object_x_cm, object_y_cm, object_z_cm)
+        print ("SHIFT HAND")
+        print (req_msg.shift.x, req_msg.shift.y, req_msg.shift.z)
         (_, _, object_yaw_rad) = tf.transformations.euler_from_quaternion(rot)
         object_yaw_deg = math.degrees(object_yaw_rad)
-        print "ts"
-        print object_x_cm
-        print object_y_cm
-        print trans
+        print ("ts")
+        
+        print (trans)
         if 34 <= object_z_cm and object_z_cm <= 103:  # 腕を水平にして把持できる高さ範囲
             rospy.loginfo("腕を水平にして把持できる高さ範囲")
             arm_lift_joint_m = (object_z_cm - 34) * 0.01
@@ -150,8 +156,8 @@ class JointController:
             self.move_wheel("X:" + str(move_x_cm))
         if abs(move_y_cm) > 1:
             self.move_wheel("Y:" + str(move_y_cm))
-        print move_x_cm
-        print move_y_cm
+        print (move_x_cm)
+        print (move_y_cm)
         self.add_arm_control_data_to_storage('arm_lift_joint', arm_lift_joint_m)
         self.add_arm_control_data_to_storage('arm_flex_joint', arm_flex_joint_rad)
         self.add_arm_control_data_to_storage('arm_roll_joint', arm_roll_joint_rad)
@@ -217,7 +223,7 @@ class JointController:
             res = wheel_ctrl_service(str_distance)
             return res.res_str
         except rospy.ServiceException as e:
-            print "Service call failed: %s" % e
+            print ("Service call failed: %s" % e)
 
     def move_to_initial_pose(self):
         time_from_start_sec = 1.0
@@ -235,8 +241,8 @@ class JointController:
     def move_to_detecting_pose(self):
         time_from_start_sec = 1.0
         self.add_head_control_data_to_storage('head_pan_joint', -0.52)
-        self.add_head_control_data_to_storage('head_tilt_joint', -0.35)
-        self.add_arm_control_data_to_storage('arm_lift_joint', 0.15)
+        self.add_head_control_data_to_storage('head_tilt_joint', -0.30)
+        self.add_arm_control_data_to_storage('arm_lift_joint', 0.20)
         self.add_arm_control_data_to_storage('arm_flex_joint', 0.0)
         self.add_arm_control_data_to_storage('arm_roll_joint', 1.5708)
         self.add_arm_control_data_to_storage('wrist_flex_joint', -1.35)
@@ -246,18 +252,19 @@ class JointController:
         self.move_wheel("T:29")
         rospy.sleep(1.0)
 
+
     def move_to_detecting_pose2(self):
         time_from_start_sec = 1.0
         self.add_head_control_data_to_storage('head_pan_joint', -0.52)
-        self.add_head_control_data_to_storage('head_tilt_joint', -0.1)
-        self.add_arm_control_data_to_storage('arm_lift_joint', 0.16)
+        self.add_head_control_data_to_storage('head_tilt_joint', -0.89)
+        self.add_arm_control_data_to_storage('arm_lift_joint', 0.15)
         self.add_arm_control_data_to_storage('arm_flex_joint', 0.0)
         self.add_arm_control_data_to_storage('arm_roll_joint', 1.5708)
         self.add_arm_control_data_to_storage('wrist_flex_joint', -1.35)
         self.add_arm_control_data_to_storage('wrist_roll_joint', 0.0)
         self.publish_head_control_data(time_from_start_sec)
         self.publish_arm_control_data(time_from_start_sec)
-        self.move_wheel("T:29")
+        #self.move_wheel("T:29")
         rospy.sleep(1.0)
 
     def move_to_detecting_box_pose(self):

@@ -46,21 +46,21 @@ class Grasping:
 
 	def Wath_motion(self, srv_msg):
 		try:
-			print srv_msg.req_str
+			print (srv_msg.req_str)
 			(trans, rot) = self.listener.lookupTransform('/base_footprint',srv_msg.req_str, rospy.Time(0))
 			x = trans[0] - 0.060
-			print x
+			print (x)
 			y = trans[1] + 0.022
-			print y
+			print (y)
 			z = 0.967 - trans[2]
-			print z
+			print (z)
 			if x < 0:
 				rospy.loginfo('向くことができません。')
 				return watch_motionResponse(False)
 			rad_pan = math.atan(y / x)
 			rad_tilt = - math.atan(z / math.sqrt(x ** 2 + y ** 2))
-			print 'head_pan_joint    :', rad_pan
-			print 'head_tilt_joint    :', rad_tilt
+			print ('head_pan_joint    :', rad_pan)
+			print ('head_tilt_joint    :', rad_tilt)
 			self.move_head('head_pan_joint', rad_pan)
 			self.move_head('head_tilt_joint', rad_tilt)
 			return watch_motionResponse(True)
@@ -80,7 +80,7 @@ class Grasping:
 		detect_height = (0.173205 + srv_msg.req_height - 0.752) * 2 #0.752を通常のbase_footprintからcameraのz軸距離、0.173205は家具まで高さが30cm時、見る角度が-30度の時のz軸
 		if detect_height < 0.2:
 			detect_height = 0.2
-		print 'DETECTING_POSEの高さ：　', detect_height
+		print ('DETECTING_POSEの高さ：　', detect_height)
 		self.move_head('head_pan_joint', 0.0)
 		self.move_head('head_tilt_joint', -0.5233)#-30度
 		self.move_arm('arm_lift_joint', 0.6)
@@ -214,15 +214,15 @@ class Grasping:
 		#物体把持の処理開始
 		rospy.loginfo("Grasp_ctrl Target_object [%s]", target_object)
 		(trans,rot) = self.listener.lookupTransform('/base_footprint', target_object, rospy.Time(0))
-		print trans
+		print (trans)
 		# 物体座標(cm)
 		object_x = (trans[0] * 100) + self.param_object_x
 		object_y = (trans[1] * 100) + self.param_object_y
 		object_z = (trans[2] * 100) + self.param_object_z
 
-		print object_x
-		print object_y
-		print object_z
+		print (object_x)
+		print (object_y)
+		print (object_z)
 
 		if 34 <= object_z and object_z <= 103:# 腕を水平にして把持できる高さ範囲
 			self.arm_lift_val = (object_z - 34) * 0.01 #m単位に変換
@@ -293,15 +293,15 @@ class Grasping:
 		#物体把持の処理開始
 		rospy.loginfo("Grasp_ctrl Target_object [%s]", target_object)
 		(trans,rot) = self.listener.lookupTransform('/base_footprint', target_object, rospy.Time(0))
-		print trans
+		print (trans)
 		# 物体座標(cm)
 		object_x = (trans[0] * 100) + self.param_object_x
 		object_y = (trans[1] * 100) + self.param_object_y
 		object_z = (trans[2] * 100) + self.param_object_z
 
-		print object_x
-		print object_y
-		print object_z
+		print (object_x)
+		print (object_y)
+		print (object_z)
 
 		if 34 <= object_z and object_z <= 103:# 腕を水平にして把持できる高さ範囲
 			object_z += 5
@@ -320,9 +320,9 @@ class Grasping:
 			if object_z < 5.0:
 				object_z = 5.0
 			object_y = 0
-			print "object_z: " , object_z
+			print ("object_z: " , object_z)
 			temp_val = (34 - object_z) / 34.5 #armの角度算出
-			print "temp_val : " , temp_val
+			print ("temp_val : " , temp_val)
 			flex_angle = math.asin(temp_val)
 			base_finger_len = 37 + (34.5 * math.cos(flex_angle))
 			self.arm_lift_val = 0.0
@@ -337,9 +337,9 @@ class Grasping:
 			self.reach_motion()
 
 		elif object_z > 103:
-			print "object_z: " , object_z
+			print ("object_z: " , object_z)
 			temp_val = (object_z - 103) / 34.5 #armの角度算出
-			print "temp_val : " , temp_val
+			print ("temp_val : " , temp_val)
 			flex_angle = math.asin(temp_val)
 			base_finger_len = 37 + (34.5 * math.cos(flex_angle))
 			self.arm_lift_val = 0.69
@@ -363,7 +363,7 @@ class Grasping:
 		#物体把持の処理開始
 		rospy.loginfo("Gripper_move Target_object [%s]", target_object)
 		(trans,rot) = self.listener.lookupTransform('/base_footprint', target_object, rospy.Time(0))
-		print trans
+		print (trans)
 		object_x = (trans[0] * 100) + srv_msg.distance.x * 100
 		object_y = (trans[1] * 100) + srv_msg.distance.y * 100
 		object_z = (trans[2] * 100) + srv_msg.distance.z * 100
@@ -564,8 +564,8 @@ class Grasping:
 			service_name = rospy.ServiceProxy('/robot_ctrl/base_ctrl', odom_base)
 			resp = service_name(str_x)
 			return resp.res_str
-		except rospy.ServiceException, e:
-			print "Service call failed: %s"%e
+		except rospy.ServiceException as e:
+			print ("Service call failed: %s"%e)
 
 if __name__ == '__main__':
 	rospy.init_node('grasp_obj_by_frame_hsr')

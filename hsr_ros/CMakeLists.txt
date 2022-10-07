@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(hsr_ros)
 
-add_compile_options(-std=c++11)
+add_compile_options(-std=c++14 -O3 -g -Wall)
 
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
