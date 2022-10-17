@@ -1,4 +1,4 @@
-map_frame_name: "/map"
+map_frame_name: "map"
 initialpose_topic_name: "/initialpose"
 pub_arrive_flag_topic_name: "arrive_flag"
 pub_location_marker_topic_name: "location_marker"

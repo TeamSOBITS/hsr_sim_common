@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding: utf-8
 import rospy
 import tf
@@ -107,42 +107,76 @@ class JointController:
         object_z_cm = (trans[2] + req_msg.shift.z + 0.8269999) * 100
         (_, _, object_yaw_rad) = tf.transformations.euler_from_quaternion(rot)
         object_yaw_deg = math.degrees(object_yaw_rad)
-        print "ts"
-        print object_x_cm
-        print object_y_cm
-        print trans
-        if 34 <= object_z_cm and object_z_cm <= 103:  # 腕を水平にして把持できる高さ範囲
-            rospy.loginfo("腕を水平にして把持できる高さ範囲")
-            arm_lift_joint_m = (object_z_cm - 34) * 0.01
-            arm_flex_joint_rad = -math.radians(90)
-            arm_roll_joint_rad = 0.0
-            wrist_roll_joint_rad = 0.0
-            wrist_flex_joint_rad = 0.0
-            move_x_cm = (object_x_cm - 71.5)  # 71.5はbase_footprintからfingerまでのx軸距離
-            move_y_cm = (object_y_cm - 7.8)  # 7.8はbase_footprintからfingerまでのy軸距離
+        print ("ts")
+        print (object_x_cm)
+        print (object_y_cm)
+        print (trans)
+        if target_object == 'game_controller' or target_object == 'hand_palm_link':
+            if 14 <= object_z_cm and object_z_cm <= 83:  # 腕を水平にして把持できる高さ範囲
+                rospy.loginfo("コントローラ ver.1")
+                arm_lift_joint_m = (object_z_cm - 34) * 0.01 + 0.3
+                arm_flex_joint_rad = -math.radians(90)
+                arm_roll_joint_rad = 0.0
+                wrist_roll_joint_rad = - 3.14 / 3
+                wrist_flex_joint_rad = -1.57
+                move_x_cm = (object_x_cm - 71.5)  # 71.5はbase_footprintからfingerまでのx軸距離
+                move_y_cm = (object_y_cm - 7.8)  # 7.8はbase_footprintからfingerまでのy軸距離
 
-        elif object_z_cm < 34:
-            rospy.loginfo("object_z_cm < 34")
-            arm_lift_joint_m = 0.0
-            wrist_flex_joint_rad = math.asin((34 - object_z_cm) / 34.5)
-            arm_flex_joint_rad = -(math.radians(90) + wrist_flex_joint_rad)
-            arm_roll_joint_rad = 0.0
-            wrist_roll_joint_rad = 0.0
-            base_to_finger_cm = 37 + (34.5 * math.cos(wrist_flex_joint_rad))
-            move_x_cm = object_x_cm - base_to_finger_cm
-            move_y_cm = object_y_cm - 7.8  # 7.8 は base_footprint から finger までのy軸距離
+            elif object_z_cm < 14:
+                rospy.loginfo("コントローラ ver.2")
+                arm_lift_joint_m = 0.0
+                wrist_flex_joint_rad = math.asin((34 - object_z_cm) / 34.5) - 1.57
+                arm_flex_joint_rad = -(math.radians(90) + wrist_flex_joint_rad)
+                arm_roll_joint_rad = 0.0
+                wrist_roll_joint_rad = - 3.14 / 3
+                base_to_finger_cm = 37 + (34.5 * math.cos(wrist_flex_joint_rad))
+                move_x_cm = object_x_cm - base_to_finger_cm
+                move_y_cm = object_y_cm - 7.8  # 7.8 は base_footprint から finger までのy軸距離
 
-        elif object_z_cm > 103:
-            rospy.loginfo("object_z_cm > 103")
-            tmp_wrist_flex_joint_rad = math.asin((object_z_cm - 103) / 34.5)
-            base_to_finger_cm = 37 + (34.5 * math.cos(tmp_wrist_flex_joint_rad))
-            arm_lift_joint_m = 0.69
-            arm_flex_joint_rad = -math.radians(90) + tmp_wrist_flex_joint_rad
-            arm_roll_joint_rad = 0.0
-            wrist_flex_joint_rad = -tmp_wrist_flex_joint_rad
-            wrist_roll_joint_rad = 0.0
-            move_x_cm = object_x_cm - base_to_finger_cm
-            move_y_cm = object_y_cm - 7.8
+            elif object_z_cm > 83:
+                rospy.loginfo("コントローラ ver.3")
+                tmp_wrist_flex_joint_rad = math.asin((object_z_cm - 103) / 34.5)
+                base_to_finger_cm = 37 + (34.5 * math.cos(tmp_wrist_flex_joint_rad))
+                arm_lift_joint_m = 0.69
+                arm_flex_joint_rad = -math.radians(90) + tmp_wrist_flex_joint_rad
+                arm_roll_joint_rad = 0.0
+                wrist_flex_joint_rad = -tmp_wrist_flex_joint_rad - 1.57
+                wrist_roll_joint_rad = - 3.14 / 3
+                move_x_cm = object_x_cm - base_to_finger_cm
+                move_y_cm = object_y_cm - 7.8
+        else:
+            if 34 <= object_z_cm and object_z_cm <= 103:  # 腕を水平にして把持できる高さ範囲
+                rospy.loginfo("腕を水平にして把持できる高さ範囲")
+                arm_lift_joint_m = (object_z_cm - 34) * 0.01
+                arm_flex_joint_rad = -math.radians(90)
+                arm_roll_joint_rad = 0.0
+                wrist_roll_joint_rad = 0.0
+                wrist_flex_joint_rad = 0.0
+                move_x_cm = (object_x_cm - 71.5)  # 71.5はbase_footprintからfingerまでのx軸距離
+                move_y_cm = (object_y_cm - 7.8)  # 7.8はbase_footprintからfingerまでのy軸距離
+
+            elif object_z_cm < 34:
+                rospy.loginfo("object_z_cm < 34")
+                arm_lift_joint_m = 0.0
+                wrist_flex_joint_rad = math.asin((34 - object_z_cm) / 34.5)
+                arm_flex_joint_rad = -(math.radians(90) + wrist_flex_joint_rad)
+                arm_roll_joint_rad = 0.0
+                wrist_roll_joint_rad = 0.0
+                base_to_finger_cm = 37 + (34.5 * math.cos(wrist_flex_joint_rad))
+                move_x_cm = object_x_cm - base_to_finger_cm
+                move_y_cm = object_y_cm - 7.8  # 7.8 は base_footprint から finger までのy軸距離
+
+            elif object_z_cm > 103:
+                rospy.loginfo("object_z_cm > 103")
+                tmp_wrist_flex_joint_rad = math.asin((object_z_cm - 103) / 34.5)
+                base_to_finger_cm = 37 + (34.5 * math.cos(tmp_wrist_flex_joint_rad))
+                arm_lift_joint_m = 0.69
+                arm_flex_joint_rad = -math.radians(90) + tmp_wrist_flex_joint_rad
+                arm_roll_joint_rad = 0.0
+                wrist_flex_joint_rad = -tmp_wrist_flex_joint_rad
+                wrist_roll_joint_rad = 0.0
+                move_x_cm = object_x_cm - base_to_finger_cm
+                move_y_cm = object_y_cm - 7.8
 
         if abs(object_yaw_deg) > 1:
             self.move_wheel("T:" + str(object_yaw_deg))
@@ -150,8 +184,8 @@ class JointController:
             self.move_wheel("X:" + str(move_x_cm))
         if abs(move_y_cm) > 1:
             self.move_wheel("Y:" + str(move_y_cm))
-        print move_x_cm
-        print move_y_cm
+        print (move_x_cm)
+        print (move_y_cm)
         self.add_arm_control_data_to_storage('arm_lift_joint', arm_lift_joint_m)
         self.add_arm_control_data_to_storage('arm_flex_joint', arm_flex_joint_rad)
         self.add_arm_control_data_to_storage('arm_roll_joint', arm_roll_joint_rad)
@@ -207,6 +241,10 @@ class JointController:
             self.move_to_measurement_pose()
         elif motion_type == "PERSON_DETECT_POSE":
             self.move_to_person_detect_pose()
+        elif motion_type == "GAMING_POSE":
+            self.move_to_game_detect_pose()
+        elif motion_type == "CUSTOM_POSE":
+            self.move_to_target_pose()
 
         return robot_motionResponse(True)
 
@@ -217,7 +255,7 @@ class JointController:
             res = wheel_ctrl_service(str_distance)
             return res.res_str
         except rospy.ServiceException as e:
-            print "Service call failed: %s" % e
+            print ("Service call failed: %s" % e)
 
     def move_to_initial_pose(self):
         time_from_start_sec = 1.0
@@ -228,8 +266,9 @@ class JointController:
         self.add_arm_control_data_to_storage('arm_roll_joint', -1.5708)
         self.add_arm_control_data_to_storage('wrist_flex_joint', -1.5708)
         self.add_arm_control_data_to_storage('wrist_roll_joint', 0)
-        self.publish_head_control_data(time_from_start_sec)
         self.publish_arm_control_data(time_from_start_sec)
+        rospy.sleep(1.0)
+        self.publish_head_control_data(time_from_start_sec)
         rospy.sleep(1.0)
 
     def move_to_detecting_pose(self):
@@ -241,8 +280,9 @@ class JointController:
         self.add_arm_control_data_to_storage('arm_roll_joint', 1.5708)
         self.add_arm_control_data_to_storage('wrist_flex_joint', -1.35)
         self.add_arm_control_data_to_storage('wrist_roll_joint', 0.0)
-        self.publish_head_control_data(time_from_start_sec)
         self.publish_arm_control_data(time_from_start_sec)
+        rospy.sleep(1.0)
+        self.publish_head_control_data(time_from_start_sec)
         self.move_wheel("T:29")
         rospy.sleep(1.0)
 
@@ -255,8 +295,9 @@ class JointController:
         self.add_arm_control_data_to_storage('arm_roll_joint', 1.5708)
         self.add_arm_control_data_to_storage('wrist_flex_joint', -1.35)
         self.add_arm_control_data_to_storage('wrist_roll_joint', 0.0)
-        self.publish_head_control_data(time_from_start_sec)
         self.publish_arm_control_data(time_from_start_sec)
+        rospy.sleep(1.0)
+        self.publish_head_control_data(time_from_start_sec)
         self.move_wheel("T:29")
         rospy.sleep(1.0)
 
@@ -269,8 +310,9 @@ class JointController:
         self.add_arm_control_data_to_storage('arm_roll_joint', 1.5708)
         self.add_arm_control_data_to_storage('wrist_flex_joint', -1.35)
         self.add_arm_control_data_to_storage('wrist_roll_joint', 0.0)
-        self.publish_head_control_data(time_from_start_sec)
         self.publish_arm_control_data(time_from_start_sec)
+        rospy.sleep(1.0)
+        self.publish_head_control_data(time_from_start_sec)
         rospy.sleep(1.0)
 
     def move_to_measurement_pose(self):
@@ -282,8 +324,9 @@ class JointController:
         self.add_arm_control_data_to_storage('arm_roll_joint', 3.14)
         self.add_arm_control_data_to_storage('wrist_flex_joint', -0.8)
         self.add_arm_control_data_to_storage('wrist_roll_joint', 0)
-        self.publish_head_control_data(time_from_start_sec)
         self.publish_arm_control_data(time_from_start_sec)
+        rospy.sleep(1.0)
+        self.publish_head_control_data(time_from_start_sec)
         rospy.sleep(1.0)
 
     def move_to_person_detect_pose(self):
@@ -295,9 +338,40 @@ class JointController:
         self.add_arm_control_data_to_storage('arm_roll_joint',  -1.5708)
         self.add_arm_control_data_to_storage('wrist_flex_joint',  -1.5708)
         self.add_arm_control_data_to_storage('wrist_roll_joint', 0.0)
-        self.publish_head_control_data(time_from_start_sec)
         self.publish_arm_control_data(time_from_start_sec)
-        self.move_wheel("T:35")
+        rospy.sleep(1.0)
+        self.publish_head_control_data(time_from_start_sec)
+        self.move_wheel("T:30")
+        rospy.sleep(1.0)
+
+    #コントローラをつかむためだけの設定
+    def move_to_game_detect_pose(self):
+        time_from_start_sec = 1.0
+        self.add_head_control_data_to_storage('head_pan_joint', 0.0)
+        self.add_head_control_data_to_storage('head_tilt_joint', 0.0)
+        self.add_arm_control_data_to_storage('arm_lift_joint', 0.69)
+        self.add_arm_control_data_to_storage('arm_flex_joint', -1.5708)
+        self.add_arm_control_data_to_storage('arm_roll_joint',  0.0)
+        self.add_arm_control_data_to_storage('wrist_flex_joint',  -1.5708)
+        self.add_arm_control_data_to_storage('wrist_roll_joint', -1.5708)
+        self.publish_arm_control_data(time_from_start_sec)
+        rospy.sleep(1.0)
+        self.publish_head_control_data(time_from_start_sec)
+        rospy.sleep(1.0)
+    
+    #各関節の引数を手動で設定してポーズ変更できる関数
+    def move_to_target_pose(self, pose={'head_pan_joint' : 0.0, 'head_tilt_joint' : 0.0, 'arm_lift_joint' : 0.0, 'arm_flex_joint' : 0.0, 'arm_roll_joint' :  -1.5708, 'wrist_flex_joint' :  -1.5708, 'wrist_roll_joint'  : 0.0}):
+        time_from_start_sec = 1.0
+        self.add_head_control_data_to_storage('head_pan_joint', pose['head_pan_joint'])
+        self.add_head_control_data_to_storage('head_tilt_joint', pose['head_tilt_joint'])
+        self.add_arm_control_data_to_storage('arm_lift_joint', pose['arm_lift_joint'])
+        self.add_arm_control_data_to_storage('arm_flex_joint', pose['arm_flex_joint'])
+        self.add_arm_control_data_to_storage('arm_roll_joint', pose['arm_roll_joint']),
+        self.add_arm_control_data_to_storage('wrist_flex_joint', pose['wrist_flex_joint'])
+        self.add_arm_control_data_to_storage('wrist_roll_joint', pose['wrist_roll_joint'])
+        self.publish_arm_control_data(time_from_start_sec)
+        rospy.sleep(1.0)
+        self.publish_head_control_data(time_from_start_sec)
         rospy.sleep(1.0)
 
 if __name__ == "__main__":
