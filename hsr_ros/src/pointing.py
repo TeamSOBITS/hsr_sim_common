@@ -10,6 +10,8 @@ import math
 import numpy
 from hsr_ros.srv import *
 
+
+
 class Pointing:
 	def __init__(self):
 
