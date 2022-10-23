@@ -205,14 +205,18 @@ class JointController:
             self.move_to_initial_pose()
         elif motion_type == "DETECTING_POSE":
             self.move_to_detecting_pose()
-        elif motion_type == "DETECTING_POSE2":
-            self.move_to_detecting_pose2()
-        elif motion_type == "DETECTING_BOX_POSE":
-            self.move_to_detecting_box_pose()
+        elif motion_type == "LOW_DETECTING_POSE":
+            self.move_to_low_detecting_pose()
+        elif motion_type == "LOWEST_DETECTING_POSE":
+            self.move_to_lowest_detecting_pose()
+        elif motion_type =="LIFT_UP_HAND":
+            self.move_to_lift_up_hand()
         elif motion_type == "MEASUREMENT_POSE":
             self.move_to_measurement_pose()
-        elif motion_type == "PERSON_DETECT_POSE":
-            self.move_to_person_detect_pose()
+        elif motion_type == "DETECTING_BOX_POSE":
+            self.move_to_detecting_box_pose()
+        else:
+            pass
 
         return robot_motionResponse(True)
 
@@ -251,9 +255,22 @@ class JointController:
         self.publish_arm_control_data(time_from_start_sec)
         self.move_wheel("T:29")
         rospy.sleep(1.0)
-
-
-    def move_to_detecting_pose2(self):
+    
+    def move_to_low_detecting_pose(self):
+        time_from_start_sec = 1.0
+        self.add_head_control_data_to_storage('head_pan_joint', -0.52)
+        self.add_head_control_data_to_storage('head_tilt_joint', -0.55)
+        self.add_arm_control_data_to_storage('arm_lift_joint', 0.15)
+        self.add_arm_control_data_to_storage('arm_flex_joint', 0.0)
+        self.add_arm_control_data_to_storage('arm_roll_joint', 1.5708)
+        self.add_arm_control_data_to_storage('wrist_flex_joint', -1.35)
+        self.add_arm_control_data_to_storage('wrist_roll_joint', 0.0)
+        self.publish_head_control_data(time_from_start_sec)
+        self.publish_arm_control_data(time_from_start_sec)
+        #self.move_wheel("T:29")
+        rospy.sleep(1.0)
+    
+    def move_to_lowest_detecting_pose(self):
         time_from_start_sec = 1.0
         self.add_head_control_data_to_storage('head_pan_joint', -0.52)
         self.add_head_control_data_to_storage('head_tilt_joint', -0.89)
@@ -265,6 +282,31 @@ class JointController:
         self.publish_head_control_data(time_from_start_sec)
         self.publish_arm_control_data(time_from_start_sec)
         #self.move_wheel("T:29")
+        rospy.sleep(1.0)
+    
+    def move_to_lift_up_hand(self):
+        global arm_lift_joint_now, arm_flex_joint_now, arm_roll_joint_now, wrist_flex_joint_now, wrist_roll_joint_now
+        time_from_start_sec = 1.0
+        arm_lift_joint_now += 0.03
+        self.add_arm_control_data_to_storage('arm_lift_joint', arm_lift_joint_now)
+        self.add_arm_control_data_to_storage('arm_flex_joint', arm_flex_joint_now)
+        self.add_arm_control_data_to_storage('arm_roll_joint', arm_roll_joint_now)
+        self.add_arm_control_data_to_storage('wrist_flex_joint', wrist_flex_joint_now)
+        self.add_arm_control_data_to_storage('wrist_roll_joint', wrist_roll_joint_now)
+        self.publish_arm_control_data(time_from_start_sec)
+        rospy.sleep(1.0)
+    
+    def move_to_measurement_pose(self):
+        time_from_start_sec = 1.0
+        self.add_head_control_data_to_storage('head_pan_joint', 0.0)
+        self.add_head_control_data_to_storage('head_tilt_joint', -0.2)#-0.2
+        self.add_arm_control_data_to_storage('arm_lift_joint', 0.0)
+        self.add_arm_control_data_to_storage('arm_flex_joint', -1.0)
+        self.add_arm_control_data_to_storage('arm_roll_joint', 3.14)
+        self.add_arm_control_data_to_storage('wrist_flex_joint', -0.8)
+        self.add_arm_control_data_to_storage('wrist_roll_joint', 0)
+        self.publish_head_control_data(time_from_start_sec)
+        self.publish_arm_control_data(time_from_start_sec)
         rospy.sleep(1.0)
 
     def move_to_detecting_box_pose(self):
@@ -280,32 +322,6 @@ class JointController:
         self.publish_arm_control_data(time_from_start_sec)
         rospy.sleep(1.0)
 
-    def move_to_measurement_pose(self):
-        time_from_start_sec = 1.0
-        self.add_head_control_data_to_storage('head_pan_joint', 0.0)
-        self.add_head_control_data_to_storage('head_tilt_joint', -0.2)#-0.2
-        self.add_arm_control_data_to_storage('arm_lift_joint', 0.0)
-        self.add_arm_control_data_to_storage('arm_flex_joint', -1.0)
-        self.add_arm_control_data_to_storage('arm_roll_joint', 3.14)
-        self.add_arm_control_data_to_storage('wrist_flex_joint', -0.8)
-        self.add_arm_control_data_to_storage('wrist_roll_joint', 0)
-        self.publish_head_control_data(time_from_start_sec)
-        self.publish_arm_control_data(time_from_start_sec)
-        rospy.sleep(1.0)
-
-    def move_to_person_detect_pose(self):
-        time_from_start_sec = 1.0
-        self.add_head_control_data_to_storage('head_pan_joint', 0.0)
-        self.add_head_control_data_to_storage('head_tilt_joint', 0.0)
-        self.add_arm_control_data_to_storage('arm_lift_joint', 0.0)
-        self.add_arm_control_data_to_storage('arm_flex_joint', 0.0)
-        self.add_arm_control_data_to_storage('arm_roll_joint',  -1.5708)
-        self.add_arm_control_data_to_storage('wrist_flex_joint',  -1.5708)
-        self.add_arm_control_data_to_storage('wrist_roll_joint', 0.0)
-        self.publish_head_control_data(time_from_start_sec)
-        self.publish_arm_control_data(time_from_start_sec)
-        self.move_wheel("T:35")
-        rospy.sleep(1.0)
 
 if __name__ == "__main__":
     rospy.init_node("joint_controller")

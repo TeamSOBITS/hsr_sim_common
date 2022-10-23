@@ -50,7 +50,9 @@ class object_depth_class{
     {
       try{
           //tf_frame1からtf_frameまでのTFを取得している
-          this->listener.lookupTransform(tf_frame,tf_frame_,ros::Time(0),this->transform);
+          ros::Time now = ros::Time::now();
+  		    listener.waitForTransform(tf_frame, tf_frame_, now, ros::Duration(30.0));
+          this->listener.lookupTransform(tf_frame,tf_frame_,now,this->transform);
           //ROSのmsg型からPCLで使えるように
           pcl::fromROSMsg(*msg, cloud);
           //ポイントクラウドのポインタを生成
