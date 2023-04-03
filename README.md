@@ -1,25 +1,32 @@
-# Common ROS package for HSR
+# Common ROS package for HSR in SIGVerse
 
-This package is a common package for HSR in SIGVerse.
+HSRをSIGVerse上で動かすためのリポジトリです．
 
-## dependency
+## Prerequisites
 
-ros-kinetic-jsk-rviz-plugins
+以下の環境で動作します．  
+・OS: Ubuntu 20.04  
+・ROS distribution: Noetic Ninjemys  
 
-ros-kinetic-rosbridge-suite
+## How to use
+まず，以下のコマンドを入力して，HSRを動かすための環境設定を行います．  
+この設定は，初回のみに行う作業ですので，1度行ったことのある人は飛ばしてください．
 
-ros-kinetic-roswww
+```bash:
+$ roscd hsr_ros
+$ chmod 755 install.sh
+$ sudo ./install.sh
+```
 
-下記のコマンドで必要な依存関係がすべてインストールできます。
+以下のコマンドを端末から入力することで，SIGVerse環境と接続することができます．  
 
-`roscd hsr_ros`
+```bash:
+$ roslaunch hsr_ros sigverse.launch
+```
 
-`chmod 755 install.sh`
+さらに，以下のコマンドを各端末から入力することで，SIGVerse環境上のHSRを擬似的に起動することができます．  
+これにより，各センサ情報を扱ったり，制御を行うことができます．
 
-`sudo ./install.sh`
-
-以下も忘れずに。
-
-`roscd hsr_ros/src`
-
-`chmod 755 *`
+```bash:
+$ roslaunch hsr_ros minimal.launch
+```
