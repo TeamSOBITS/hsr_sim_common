@@ -20,6 +20,7 @@ class JointController:
         self.pub_gripper_control = rospy.Publisher("/hsrb/gripper_controller/command", JointTrajectory, queue_size=10)
         self.servise = rospy.Service("gripper_open_and_close", gripper_ctrl, self.open_and_close_gripper_server)
         self.servise = rospy.Service("gripper_move_to_target", gripper_move, self.move_gripper_to_target_server)
+        self.servise = rospy.Service("gripper_move_to_target_for_game_controller", gripper_move, self.move_gripper_to_target_for_game_controller_server)
         self.servise = rospy.Service("motion_ctrl", robot_motion, self.move_to_registered_motion_server)
         self.servise = rospy.Service("is_grasped", is_grasped, self.is_grasped_server)
         self.listener = tf.TransformListener()
@@ -111,72 +112,38 @@ class JointController:
         print (object_x_cm)
         print (object_y_cm)
         print (trans)
-        if target_object == 'game_controller' or target_object == 'hand_palm_link':
-            if 14 <= object_z_cm and object_z_cm <= 83:  # 腕を水平にして把持できる高さ範囲
-                rospy.loginfo("コントローラ ver.1")
-                arm_lift_joint_m = (object_z_cm - 34) * 0.01 + 0.3
-                arm_flex_joint_rad = -math.radians(90)
-                arm_roll_joint_rad = 0.0
-                wrist_roll_joint_rad = - 3.14 / 3
-                wrist_flex_joint_rad = -1.57
-                move_x_cm = (object_x_cm - 71.5)  # 71.5はbase_footprintからfingerまでのx軸距離
-                move_y_cm = (object_y_cm - 7.8)  # 7.8はbase_footprintからfingerまでのy軸距離
+        if 34 <= object_z_cm and object_z_cm <= 103:  # 腕を水平にして把持できる高さ範囲
+            rospy.loginfo("腕を水平にして把持できる高さ範囲")
+            arm_lift_joint_m = (object_z_cm - 34) * 0.01
+            arm_flex_joint_rad = -math.radians(90)
+            arm_roll_joint_rad = 0.0
+            wrist_roll_joint_rad = 0.0
+            wrist_flex_joint_rad = 0.0
+            move_x_cm = (object_x_cm - 71.5)  # 71.5はbase_footprintからfingerまでのx軸距離
+            move_y_cm = (object_y_cm - 7.8)  # 7.8はbase_footprintからfingerまでのy軸距離
 
-            elif object_z_cm < 14:
-                rospy.loginfo("コントローラ ver.2")
-                arm_lift_joint_m = 0.0
-                wrist_flex_joint_rad = math.asin((34 - object_z_cm) / 34.5) - 1.57
-                arm_flex_joint_rad = -(math.radians(90) + wrist_flex_joint_rad)
-                arm_roll_joint_rad = 0.0
-                wrist_roll_joint_rad = - 3.14 / 3
-                base_to_finger_cm = 37 + (34.5 * math.cos(wrist_flex_joint_rad))
-                move_x_cm = object_x_cm - base_to_finger_cm
-                move_y_cm = object_y_cm - 7.8  # 7.8 は base_footprint から finger までのy軸距離
+        elif object_z_cm < 34:
+            rospy.loginfo("object_z_cm < 34")
+            arm_lift_joint_m = 0.0
+            wrist_flex_joint_rad = math.asin((34 - object_z_cm) / 34.5)
+            arm_flex_joint_rad = -(math.radians(90) + wrist_flex_joint_rad)
+            arm_roll_joint_rad = 0.0
+            wrist_roll_joint_rad = 0.0
+            base_to_finger_cm = 37 + (34.5 * math.cos(wrist_flex_joint_rad))
+            move_x_cm = object_x_cm - base_to_finger_cm
+            move_y_cm = object_y_cm - 7.8  # 7.8 は base_footprint から finger までのy軸距離
 
-            elif object_z_cm > 83:
-                rospy.loginfo("コントローラ ver.3")
-                tmp_wrist_flex_joint_rad = math.asin((object_z_cm - 103) / 34.5)
-                base_to_finger_cm = 37 + (34.5 * math.cos(tmp_wrist_flex_joint_rad))
-                arm_lift_joint_m = 0.69
-                arm_flex_joint_rad = -math.radians(90) + tmp_wrist_flex_joint_rad
-                arm_roll_joint_rad = 0.0
-                wrist_flex_joint_rad = -tmp_wrist_flex_joint_rad - 1.57
-                wrist_roll_joint_rad = - 3.14 / 3
-                move_x_cm = object_x_cm - base_to_finger_cm
-                move_y_cm = object_y_cm - 7.8
-        else:
-            if 34 <= object_z_cm and object_z_cm <= 103:  # 腕を水平にして把持できる高さ範囲
-                rospy.loginfo("腕を水平にして把持できる高さ範囲")
-                arm_lift_joint_m = (object_z_cm - 34) * 0.01
-                arm_flex_joint_rad = -math.radians(90)
-                arm_roll_joint_rad = 0.0
-                wrist_roll_joint_rad = 0.0
-                wrist_flex_joint_rad = 0.0
-                move_x_cm = (object_x_cm - 71.5)  # 71.5はbase_footprintからfingerまでのx軸距離
-                move_y_cm = (object_y_cm - 7.8)  # 7.8はbase_footprintからfingerまでのy軸距離
-
-            elif object_z_cm < 34:
-                rospy.loginfo("object_z_cm < 34")
-                arm_lift_joint_m = 0.0
-                wrist_flex_joint_rad = math.asin((34 - object_z_cm) / 34.5)
-                arm_flex_joint_rad = -(math.radians(90) + wrist_flex_joint_rad)
-                arm_roll_joint_rad = 0.0
-                wrist_roll_joint_rad = 0.0
-                base_to_finger_cm = 37 + (34.5 * math.cos(wrist_flex_joint_rad))
-                move_x_cm = object_x_cm - base_to_finger_cm
-                move_y_cm = object_y_cm - 7.8  # 7.8 は base_footprint から finger までのy軸距離
-
-            elif object_z_cm > 103:
-                rospy.loginfo("object_z_cm > 103")
-                tmp_wrist_flex_joint_rad = math.asin((object_z_cm - 103) / 34.5)
-                base_to_finger_cm = 37 + (34.5 * math.cos(tmp_wrist_flex_joint_rad))
-                arm_lift_joint_m = 0.69
-                arm_flex_joint_rad = -math.radians(90) + tmp_wrist_flex_joint_rad
-                arm_roll_joint_rad = 0.0
-                wrist_flex_joint_rad = -tmp_wrist_flex_joint_rad
-                wrist_roll_joint_rad = 0.0
-                move_x_cm = object_x_cm - base_to_finger_cm
-                move_y_cm = object_y_cm - 7.8
+        elif object_z_cm > 103:
+            rospy.loginfo("object_z_cm > 103")
+            tmp_wrist_flex_joint_rad = math.asin((object_z_cm - 103) / 34.5)
+            base_to_finger_cm = 37 + (34.5 * math.cos(tmp_wrist_flex_joint_rad))
+            arm_lift_joint_m = 0.69
+            arm_flex_joint_rad = -math.radians(90) + tmp_wrist_flex_joint_rad
+            arm_roll_joint_rad = 0.0
+            wrist_flex_joint_rad = -tmp_wrist_flex_joint_rad
+            wrist_roll_joint_rad = 0.0
+            move_x_cm = object_x_cm - base_to_finger_cm
+            move_y_cm = object_y_cm - 7.8
 
         if abs(object_yaw_deg) > 1:
             self.move_wheel("T:" + str(object_yaw_deg))
@@ -198,6 +165,91 @@ class JointController:
         self.publish_head_control_data(2.0)
         rospy.sleep(2.0)
         return gripper_moveResponse(True)
+
+    def move_gripper_to_target_for_game_controller_server(self, req_msg):#if target_object == 'game_controller' or target_object == 'hand_palm_link':
+        """
+            hand_motor_link を指定したtfに動かすサービス
+            target_name : 目標のtf名
+            shift       : 目標のtfの位置からどれだけずらすか
+        """
+        target_object = req_msg.target_name
+        try:
+            self.listener.waitForTransform("/head_pan_link", target_object, rospy.Time(0), rospy.Duration(2.0))
+            (trans, _) = self.listener.lookupTransform("/head_pan_link", target_object, rospy.Time(0))
+            self.listener.waitForTransform("/base_footprint", "head_pan_link", rospy.Time(0), rospy.Duration(2.0))
+            (_, rot) = self.listener.lookupTransform("/base_footprint", "head_pan_link", rospy.Time(0))
+            # print a
+        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+            rospy.logerr("TF lookup error /base_footprint to {}".format(target_object))
+            return gripper_moveResponse(False)
+        except Exception as e:
+            rospy.logerr("joint_controller unknown error")
+            rospy.logerr(e)
+            return gripper_moveResponse(False)
+        object_x_cm = (trans[0] + req_msg.shift.x) * 100
+        object_y_cm = (trans[1] + req_msg.shift.y) * 100
+        object_z_cm = (trans[2] + req_msg.shift.z + 0.8269999) * 100
+        (_, _, object_yaw_rad) = tf.transformations.euler_from_quaternion(rot)
+        object_yaw_deg = math.degrees(object_yaw_rad)
+        print ("ts")
+        print (object_x_cm)
+        print (object_y_cm)
+        print (trans)
+
+        if 14 <= object_z_cm and object_z_cm <= 83:  # 腕を水平にして把持できる高さ範囲
+            rospy.loginfo("コントローラ ver.1")
+            arm_lift_joint_m = (object_z_cm - 34) * 0.01 + 0.3
+            arm_flex_joint_rad = -math.radians(90)
+            arm_roll_joint_rad = 0.0
+            wrist_roll_joint_rad = - 3.14 / 3
+            wrist_flex_joint_rad = -1.57
+            move_x_cm = (object_x_cm - 71.5)  # 71.5はbase_footprintからfingerまでのx軸距離
+            move_y_cm = (object_y_cm - 7.8)  # 7.8はbase_footprintからfingerまでのy軸距離
+
+        elif object_z_cm < 14:
+            rospy.loginfo("コントローラ ver.2")
+            arm_lift_joint_m = 0.0
+            wrist_flex_joint_rad = math.asin((34 - object_z_cm) / 34.5) - 1.57
+            arm_flex_joint_rad = -(math.radians(90) + wrist_flex_joint_rad)
+            arm_roll_joint_rad = 0.0
+            wrist_roll_joint_rad = - 3.14 / 3
+            base_to_finger_cm = 37 + (34.5 * math.cos(wrist_flex_joint_rad))
+            move_x_cm = object_x_cm - base_to_finger_cm
+            move_y_cm = object_y_cm - 7.8  # 7.8 は base_footprint から finger までのy軸距離
+
+        elif object_z_cm > 83:
+            rospy.loginfo("コントローラ ver.3")
+            tmp_wrist_flex_joint_rad = math.asin((object_z_cm - 103) / 34.5)
+            base_to_finger_cm = 37 + (34.5 * math.cos(tmp_wrist_flex_joint_rad))
+            arm_lift_joint_m = 0.69
+            arm_flex_joint_rad = -math.radians(90) + tmp_wrist_flex_joint_rad
+            arm_roll_joint_rad = 0.0
+            wrist_flex_joint_rad = -tmp_wrist_flex_joint_rad - 1.57
+            wrist_roll_joint_rad = - 3.14 / 3
+            move_x_cm = object_x_cm - base_to_finger_cm
+            move_y_cm = object_y_cm - 7.8
+
+        if abs(object_yaw_deg) > 1:
+            self.move_wheel("T:" + str(object_yaw_deg))
+        if abs(move_x_cm) > 1:
+            self.move_wheel("X:" + str(move_x_cm))
+        if abs(move_y_cm) > 1:
+            self.move_wheel("Y:" + str(move_y_cm))
+        print (move_x_cm)
+        print (move_y_cm)
+        self.add_arm_control_data_to_storage('arm_lift_joint', arm_lift_joint_m)
+        self.add_arm_control_data_to_storage('arm_flex_joint', arm_flex_joint_rad)
+        self.add_arm_control_data_to_storage('arm_roll_joint', arm_roll_joint_rad)
+        self.add_arm_control_data_to_storage('wrist_flex_joint', wrist_flex_joint_rad)
+        self.add_arm_control_data_to_storage('wrist_roll_joint', wrist_roll_joint_rad)
+        rospy.loginfo(self.arm_control_data)
+        self.add_head_control_data_to_storage('head_pan_joint', 0.0)
+        self.add_head_control_data_to_storage('head_tilt_joint', -0.35)
+        self.publish_arm_control_data(2.0)
+        self.publish_head_control_data(2.0)
+        rospy.sleep(2.0)
+        return gripper_moveResponse(True)
+
 
     def open_and_close_gripper_server(self, req_msg):
         hand_motor_joint_rad = req_msg.rad
