@@ -17,7 +17,7 @@ foreach(_xacro ${_robot_xacros})
     add_custom_command(
         OUTPUT ${_urdf}
         DEPENDS ${_xacro} ${_component_xacros}
-        COMMAND ${CATKIN_DEVEL_PREFIX}/env.sh rosrun xacro xacro.py ${_xacro} > ${_urdf})
+        COMMAND ${CATKIN_DEVEL_PREFIX}/env.sh rosrun xacro xacro ${_xacro} > ${_urdf})
     add_custom_target(${PROJECT_NAME}_${_name}_gen_urdf ALL DEPENDS ${_urdf})
 endforeach()
 
