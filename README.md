@@ -146,10 +146,7 @@ hsr_rosパッケージのjoint_controller.py(hsr_ros/src)の関数を呼び出�
 <div align="center">
  <p>
     <img src="hsr_ros/img/initial.png" title="initial_pose" width="280">
-   
     <img src="hsr_ros/img/detect.png" title="detecting_pose" width="280"> 
-   
     <img src="hsr_ros/img/measure.png" title="measurement_pose" width="280"> 
-    
  </p>
 </div>
