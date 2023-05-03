@@ -151,6 +151,9 @@ hsr_rosパッケージのjoint_controller.py(hsr_ros/src)の関数を呼び出�
  </p>
 </div>
 左から
+
 ### ①initial_pose
+
 ### ②detecting_pose
+
 ### ③measurement_pose
