@@ -31,7 +31,8 @@ $ roslaunch hsr_ros sigverse.launch
 $ roslaunch hsr_ros minimal.launch
 ```
 ## Example
-#物体把持を行うプログラム（python）
+# 物体把持を行うプログラム（python）
+
 物体検出をした際，object_x_cm，object_y_cm，object_z_cmにそれぞれの座標情報を入力することでその位置の物体の把持をすることができます.
 ※デフォルトでは各値50が入っています。
 ```
@@ -141,4 +142,4 @@ if __name__ == '__main__':
 ```
 
 ## HSRの姿勢を変える
-
+# 
