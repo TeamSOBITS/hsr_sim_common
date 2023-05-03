@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
   <!-- args -->
-  <group ns = "aaa">
+  <group ns = "display_robot">
     <arg name="gui" default="true" />
     <arg name="robot" default="hsrb4s" />
 
