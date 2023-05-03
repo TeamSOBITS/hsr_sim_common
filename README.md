@@ -2,13 +2,13 @@
 
 HSRをSIGVerse上で動かすためのリポジトリです．
 
-### Prerequisites
+## Prerequisites
 
 以下の環境で動作します．  
 ・OS: Ubuntu 20.04  
 ・ROS distribution: Noetic Ninjemys  
 
-### How to use
+## How to use
 まず，以下のコマンドを入力して，HSRを動かすための環境設定を行います．  
 この設定は，初回のみに行う作業ですので，1度行ったことのある人は飛ばしてください．
 
