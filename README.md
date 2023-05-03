@@ -150,3 +150,7 @@ hsr_rosパッケージのjoint_controller.py(hsr_ros/src)の関数を呼び出�
     <img src="hsr_ros/img/measure.png" title="measurement_pose" width="280"> 
  </p>
 </div>
+左から
+### ①initial_pose
+### ②detecting_pose
+### ③measurement_pose
