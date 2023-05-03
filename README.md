@@ -142,4 +142,11 @@ if __name__ == '__main__':
 ```
 
 ## HSRの姿勢を変える
-### 
+hsr_rosパッケージのjoint_controller.py(hsr_ros/src)の関数を呼び出すことでHSRを以下のようなPose（姿勢）にすることができます.
+<div align="center">
+ <p>
+    <img src="hsr_ros/img/initial.png" width="380">
+    <img src="hsr_ros/img/detest.png" width="380"> 
+    <img src="hsr_ros/img/measure.png" width="380"> 
+ </p>
+</div>
