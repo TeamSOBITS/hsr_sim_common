@@ -160,7 +160,7 @@ hsr_rosパッケージのjoint_controller.py(hsr_ros/src)の関数を呼び出�
 
 ### ②detecting_pose  
 用途：物体認識の際に用いるpose(姿勢)  
-説明：物体を認識する際に，カメラのフレーム内に  アームが映らないようにする姿勢  
+説明：物体を認識する際に，カメラのフレーム内にアームが映らないようにする姿勢  
 関数名：move_to_detecting_pose（joint_controller.py） 
 
 ### ③measurement_pose  
