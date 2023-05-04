@@ -150,7 +150,9 @@ hsr_rosパッケージのjoint_controller.py(hsr_ros/src)の関数を呼び出�
     <img src="hsr_ros/img/measure.png" title="measurement_pose" width="280"> 
  </p>
 </div>
-左から  
+
+左から
+
 ### ①initial_pose  
 自律移動をする際に用いるpose(姿勢)  
 アームが移動中に衝突しないようにする姿勢です.    
