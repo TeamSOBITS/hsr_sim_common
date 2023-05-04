@@ -150,17 +150,17 @@ hsr_rosパッケージのjoint_controller.py(hsr_ros/src)の関数を呼び出�
     <img src="hsr_ros/img/measure.png" title="measurement_pose" width="280"> 
  </p>
 </div>
-左から
+左から  
 ### ①initial_pose  
 自律移動をする際に用いるpose(姿勢)  
-アームが移動中に衝突しないようにする姿勢です.  
-関数名：move_to_initial_pose（joint_controller.py）  
+アームが移動中に衝突しないようにする姿勢です.    
+関数名：move_to_initial_pose（joint_controller.py） 
 
 ### ②detecting_pose  
 物体認識の際に用いるpose(姿勢)  
 物体を認識する際に，カメラのフレーム内に  
 アームが映らないようにする姿勢です.  
-関数名：move_to_detecting_pose（joint_controller.py）  
+関数名：move_to_detecting_pose（joint_controller.py） 
 
 ### ③measurement_pose  
 物体の高さを計測する際に用いるpose(姿勢)  
