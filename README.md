@@ -131,10 +131,6 @@
 
 ## ソフトウェア
 
-<details>
-<summary>HSR(SIGVerse)と関わるソフトの情報まとめ</summary>
-
-
 ### 物体把持
 exampleフォルダに入ってある, grasp.pyを参照してください
 
