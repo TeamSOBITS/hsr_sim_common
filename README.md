@@ -1,147 +1,144 @@
-# Common ROS package for HSR in SIGVerse
+<a name="readme-top"></a>
 
-HSRをSIGVerse上で動かすためのリポジトリです．
+[JA](README.md) | [EN](README.en.md)
 
-## Prerequisites
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![License][license-shield]][license-url]
 
-以下の環境で動作します．  
-・OS: Ubuntu 20.04  
-・ROS distribution: Noetic Ninjemys  
+# HSR_sim_common
 
-## How to use
-まず，以下のコマンドを入力して，HSRを動かすための環境設定を行います．  
-この設定は，初回のみに行う作業ですので，1度行ったことのある人は飛ばしてください．
+<!-- 目次 -->
+<details>
+  <summary>目次</summary>
+  <ol>
+    <li>
+      <a href="#概要">概要</a>
+    </li>
+    <li>
+      <a href="#環境構築">環境構築</a>
+      <ul>
+        <li><a href="#環境条件">環境条件</a></li>
+        <li><a href="#インストール方法">インストール方法</a></li>
+      </ul>
+    </li>
+    <li>
+    　<a href="#実行操作方法">実行・操作方法</a>
+      <ul>
+        <li><a href="#Launchの起動">Launchの起動</a></li>
+      </ul>
+    </li>
+    <li>
+    　<a href="#ソフトウェア">ソフトウェア</a>
+      <ul>
+        <li><a href="#物体把持">物体把持</a></li>
+        <li><a href="#ポーズの変更">ポーズの変更</a></li>
+      </ul>
+    </li>
 
-```bash:
-$ roscd hsr_ros
-$ chmod 755 install.sh
-$ sudo ./install.sh
-```
-
-以下のコマンドを端末から入力することで，SIGVerse環境と接続することができます．  
-
-```bash:
-$ roslaunch hsr_ros sigverse.launch
-```
-
-さらに，以下のコマンドを各端末から入力することで，SIGVerse環境上のHSRを擬似的に起動することができます．  
-これにより，各センサ情報を扱ったり，制御を行うことができます．
-
-```bash:
-$ roslaunch hsr_ros minimal.launch
-```
-## Example
-### 物体把持を行うプログラム（python）
-
-物体検出をした際，object_x_cm，object_y_cm，object_z_cmにそれぞれの座標情報を入力することでその位置の物体の把持をすることができます.
-※デフォルトでは各値50が入っています。
-```
-#!/usr/bin/env python3
-# coding: utf-8
-import rospy
-import math
-from hsr_ros.srv import gripper_moveResponse
-from hsr_ros.srv import gripper_ctrl
-from joint_controller import JointController
-
-def test_grasp():
-    rospy.init_node('test_grasp')
-    jc = JointController()
-    # 任意の場所の物体を把持する
-    # 認識した物体のtfを元に位置の情報を以下に代入することで把持が可能になります.
-    # 現在は各座標50に設定されており決め打ちの把持の処理を行います.
-    object_x_cm = 50
-    object_y_cm = 50
-    object_z_cm = 50
-    
-
-    if 34 <= object_z_cm and object_z_cm <= 103:  # 腕を水平にして把持できる高さ範囲
-        rospy.loginfo("腕を水平にして把持できる高さ範囲")
-        arm_lift_joint_m = (object_z_cm - 34) * 0.01
-        arm_flex_joint_rad = -math.radians(90)
-        arm_roll_joint_rad = 0.0
-        wrist_roll_joint_rad = 0.0
-        wrist_flex_joint_rad = 0.0
-        move_x_cm = (object_x_cm - 71.5)  # 71.5はbase_footprintからfingerまでのx軸距離
-        move_y_cm = (object_y_cm - 7.8)  # 7.8はbase_footprintからfingerまでのy軸距離
-
-    elif object_z_cm < 34:
-        rospy.loginfo("object_z_cm < 34")
-        arm_lift_joint_m = 0.0
-        wrist_flex_joint_rad = math.asin((34 - object_z_cm) / 34.5)
-        arm_flex_joint_rad = -(math.radians(90) + wrist_flex_joint_rad)
-        arm_roll_joint_rad = 0.0
-        wrist_roll_joint_rad = 0.0
-        base_to_finger_cm = 37 + (34.5 * math.cos(wrist_flex_joint_rad))
-        move_x_cm = object_x_cm - base_to_finger_cm
-        move_y_cm = object_y_cm - 7.8  # 7.8 は base_footprint から finger までのy軸距離
-
-    elif object_z_cm > 103:
-        rospy.loginfo("object_z_cm > 103")
-        tmp_wrist_flex_joint_rad = math.asin((object_z_cm - 103) / 34.5)
-        # base_to_finger_cm = 37 + (34.5 * math.cos(tmp_wrist_flex_joint_rad))
-        arm_lift_joint_m = 0.69
-        arm_flex_joint_rad = -math.radians(90) + tmp_wrist_flex_joint_rad
-        arm_roll_joint_rad = 0.0
-        wrist_flex_joint_rad = -tmp_wrist_flex_joint_rad
-        wrist_roll_joint_rad = 0.0
-        move_x_cm = object_x_cm - base_to_finger_cm
-        move_y_cm = object_y_cm - 7.8
-
-    rospy.loginfo("把持処理")
-    jc.move_to_initial_pose()
-    open_gripper()
-    if abs(move_x_cm) > 1:
-        jc.move_wheel("X:" + str(move_x_cm))
-    if abs(move_y_cm) > 1:
-        jc.move_wheel("Y:" + str(move_y_cm))
-    jc.add_arm_control_data_to_storage('arm_lift_joint', arm_lift_joint_m)
-    jc.add_arm_control_data_to_storage('arm_flex_joint', arm_flex_joint_rad)
-    jc.add_arm_control_data_to_storage('arm_roll_joint', arm_roll_joint_rad)
-    jc.add_arm_control_data_to_storage('wrist_flex_joint', wrist_flex_joint_rad)
-    jc.add_arm_control_data_to_storage('wrist_roll_joint', wrist_roll_joint_rad)
-    rospy.loginfo(jc.arm_control_data)
-    jc.add_head_control_data_to_storage('head_pan_joint', 0.0)
-    jc.add_head_control_data_to_storage('head_tilt_joint', -0.35)
-    jc.publish_arm_control_data(2.0)
-    jc.publish_head_control_data(2.0)
-    rospy.sleep(2.0)
-    close_gripper()
-    rospy.sleep(2.0)
-    jc.move_to_initial_pose()
-    return gripper_moveResponse(True)
-
-
-def open_gripper():
-    rospy.wait_for_service("/robot_ctrl/gripper_open_and_close", 3.0)
-    try:
-        gripper_open_service = rospy.ServiceProxy("/robot_ctrl/gripper_open_and_close", gripper_ctrl)
-        res = gripper_open_service(0.92)
-        return res.is_moved
-    except rospy.ServiceException as e:
-        rospy.logerr("Gripper_open Service call failed: %s", e)
-    return False
-
-
-def close_gripper():
-    rospy.wait_for_service("/robot_ctrl/gripper_open_and_close", 3.0)
-    try:
-        gripper_open_service = rospy.ServiceProxy("/robot_ctrl/gripper_open_and_close", gripper_ctrl)
-        res = gripper_open_service(0.00)
-        return res.is_moved
-    except rospy.ServiceException as e:
-        rospy.logerr("Gripper_close Service call failed: %s", e)
-    return False
+    <li><a href="#マイルストーン">マイルストーン</a></li>
+    <!-- <li><a href="#contributing">Contributing</a></li> -->
+    <!-- <li><a href="#license">License</a></li> -->
+    <li><a href="#参考文献">参考文献</a></li>
+  </ol>
+</details>
 
 
 
-if __name__ == '__main__':
-    try:
-        test_grasp()
-    except rospy.ROSInterruptException: pass
-```
+<!-- レポジトリの概要 -->
+## 概要
 
-## HSRの姿勢を変える
+これは、HSR(SIGVerse)を動かすために必要なパッケージです。
+ロボットのmeshやdiscriptionはここでinstallします。また物体把持やポーズの関数もこのパッケージで指定しています。
+
+
+<!-- セットアップ -->
+## セットアップ
+
+ここで，本レポジトリのセットアップ方法について説明します．
+
+<p align="right">(<a href="#readme-top">上に戻る</a>)</p>
+
+
+### 環境条件
+
+まず，以下の環境を整えてから，次のインストール段階に進んでください．
+
+| System  | Version |
+| ------------- | ------------- |
+| Ubuntu | 20.04 (Focal Fossa) |
+| ROS | Noetic Ninjemys |
+| Python | 3.8 |
+
+> [!NOTE]
+> `Ubuntu`や`ROS`のインストール方法に関しては，[SOBITS Manual](https://github.com/TeamSOBITS/sobits_manual#%E9%96%8B%E7%99%BA%E7%92%B0%E5%A2%83%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6)に参照してください．
+
+<p align="right">(<a href="#readme-top">上に戻る</a>)</p>
+
+
+### インストール方法
+
+1. ROSの`src`フォルダに移動します．
+   ```sh
+   $ roscd
+   # もしくは，"cd ~/catkin_ws/"へ移動．
+   $ cd src/
+   ```
+2. 本レポジトリをcloneします．
+   ```sh
+   $ git clone https://github.com/TeamSOBITS/hsr_sim_common
+   ```
+3. レポジトリの中へ移動します．
+   ```sh
+   $ cd /hsr_sim_common
+   ```
+4. 依存パッケージをインストールします．
+   ```sh
+   $ bash install.sh
+   ```
+   以下のコマンドを入力して，HSRを動かすための環境設定を行います．  
+   この設定は，初回のみに行う作業ですので，1度行ったことのある人は飛ばしてください．
+
+    ```bash:
+    $ roscd hsr_ros
+    $ chmod 755 install.sh
+    $ sudo ./install.sh
+    ```
+
+5. パッケージをコンパイルします．
+   ```sh
+   $ roscd
+   # もしくは，"cd ~/catkin_ws/"へ移動．
+   $ catkin_make
+   ```
+
+<p align="right">(<a href="#readme-top">上に戻る</a>)</p>
+
+
+<!-- 実行・操作方法 -->
+## 実行・操作方法
+
+1. HSRの起動する機能をパラメータとして[minimal.launch](hsr_sim_common/launch/minimal.launch)に設定します．
+   ```xml
+    roslaunch hsr_sim_common minimal.launch
+    ...
+   ```
+
+<p align="right">(<a href="#readme-top">上に戻る</a>)</p>
+
+
+## ソフトウェア
+
+<details>
+<summary>HSR(SIGVerse)と関わるソフトの情報まとめ</summary>
+
+
+### 物体把持
+exampleフォルダに入ってある, grasp.pyを参照してください
+
+### ポーズの変更
 hsr_rosパッケージのjoint_controller.py(hsr_ros/src)の関数を呼び出すことでHSRを以下のようなPose（姿勢）にすることができます.
 <div align="center">
  <p>
@@ -153,17 +150,65 @@ hsr_rosパッケージのjoint_controller.py(hsr_ros/src)の関数を呼び出�
 
 左から
 
-### ①initial_pose  
+#### ①initial_pose  
 用途：自律移動をする際に用いるpose(姿勢)  
 説明：アームが移動中に衝突しないようにする姿勢  
 関数名：move_to_initial_pose（joint_controller.py） 
 
-### ②detecting_pose  
+#### ②detecting_pose  
 用途：物体認識の際に用いるpose(姿勢)  
 説明：物体を認識する際に，カメラのフレーム内にアームが映らないようにする姿勢  
 関数名：move_to_detecting_pose（joint_controller.py） 
 
-### ③measurement_pose  
+#### ③measurement_pose  
 用途：物体の高さを計測する際に用いるpose(姿勢)  
 説明：この姿勢を用いることで，物体の高さを求めることができ，安全な物体の配置が可能  
 関数名：move_to_measurement_pose（joint_controller.py）  
+
+
+<p align="right">(<a href="#readme-top">上に戻る</a>)</p>
+
+
+<!-- マイルストーン -->
+## マイルストーン
+
+- [x] exampleファイルの修正
+- [x] OSS
+    - [x] ドキュメンテーションの充実
+    - [x] コーディングスタイルの統一
+
+現時点のバッグや新規機能の依頼を確認するために[Issueページ][issues-url] をご覧ください．
+
+<p align="right">(<a href="#readme-top">上に戻る</a>)</p>
+
+
+<!-- CONTRIBUTING -->
+<!-- ## Contributing
+
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+Don't forget to give the project a star! Thanks again!
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+<p align="right">(<a href="#readme-top">上に戻る</a>)</p> -->
+
+
+<!-- LICENSE -->
+<!-- ## License
+
+Distributed under the MIT License. See `LICENSE.txt` for more NOTErmation.
+
+<p align="right">(<a href="#readme-top">上に戻る</a>)</p> -->
+
+
+<!-- 参考文献 -->
+## 参考文献
+
+
+[license-url]: LICENSE
