@@ -209,12 +209,14 @@ Distributed under the MIT License. See `LICENSE.txt` for more NOTErmation.
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/TeamSOBITS/sobit_pro.svg?style=for-the-badge
-[contributors-url]: https://github.com/TeamSOBITS/sobit_pro/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/TeamSOBITS/sobit_pro.svg?style=for-the-badge
-[forks-url]: https://github.com/TeamSOBITS/sobit_pro/network/members
-[stars-shield]: https://img.shields.io/github/stars/TeamSOBITS/sobit_pro.svg?style=for-the-badge
-[stars-url]: https://github.com/TeamSOBITS/sobit_pro/stargazers
-
-
+[contributors-shield]: https://img.shields.io/github/contributors/TeamSOBITS/hsr_sim_common.svg?style=for-the-badge
+[contributors-url]: https://github.com/TeamSOBITS/hsr_sim_common/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/TeamSOBITS/hsr_sim_common.svg?style=for-the-badge
+[forks-url]: https://github.com/TeamSOBITS/hsr_sim_common/network/members
+[stars-shield]: https://img.shields.io/github/stars/TeamSOBITS/hsr_sim_common.svg?style=for-the-badge
+[stars-url]: https://github.com/TeamSOBITS/hsr_sim_common/stargazers
+[issues-shield]: https://img.shields.io/github/issues/TeamSOBITS/hsr_sim_common.svg?style=for-the-badge
+[issues-url]: https://github.com/TeamSOBITS/hsr_sim_common/issues
+[license-shield]: https://img.shields.io/github/license/TeamSOBITS/hsr_sim_common.svg?style=for-the-badge
 [license-url]: LICENSE
+
