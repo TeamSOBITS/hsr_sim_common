@@ -12,58 +12,58 @@
 
 <!-- 目次 -->
 <details>
-  <summary>Table of Contents</summary>
+  <summary>目次</summary>
   <ol>
     <li>
-      <a href="#Introduction">Introduction</a>
+      <a href="#概要">概要</a>
     </li>
     <li>
-      <a href="#Set Up">Set Up</a>
+      <a href="#セットアップ">セットアップ</a>
       <ul>
-        <li><a href="#prerequisites">prerequisites</a></li>
-        <li><a href="#installation">installation</a></li>
+        <li><a href="#環境条件">環境条件</a></li>
+        <li><a href="#インストール方法">インストール方法</a></li>
       </ul>
     </li>
     <li>
-    　<a href="#launch-and-usage">launch-and-usage</a>
+    　<a href="#実行操作方法">実行・操作方法</a>
       <ul>
-        <li><a href="#Launch">Launch</a></li>
+        <li><a href="#Launchの起動">Launchの起動</a></li>
       </ul>
     </li>
     <li>
-    　<a href="#SoftWere">SoftWere</a>
+    　<a href="#ソフトウェア">ソフトウェア</a>
       <ul>
-        <li><a href="#Grasp">Grasp</a></li>
-        <li><a href="#Change Pose">Change Pose</a></li>
+        <li><a href="#物体把持">物体把持</a></li>
+        <li><a href="#ポーズの変更">ポーズの変更</a></li>
       </ul>
     </li>
-    <li><a href="#milestone">milestone</a></li>
+    <li><a href="#マイルストーン">マイルストーン</a></li>
     <!-- <li><a href="#contributing">Contributing</a></li> -->
     <!-- <li><a href="#license">License</a></li> -->
-    <li><a href="#References">References</a></li>
+    <li><a href="#参考文献">参考文献</a></li>
   </ol>
 </details>
 
 
 
 <!-- レポジトリの概要 -->
-## Introduction
+## 概要
 
-This is the package required to run HSR (SIGVerse).
-The mesh and description of the robot are installed here. Object grasping and posing functions are also specified in this package.
+これは，HSR(SIGVerse)を動かすために必要なパッケージです．
+ロボットのmeshやdiscriptionはここでinstallします．また物体把持やポーズの関数もこのパッケージで指定しています．
 
 
 <!-- セットアップ -->
-## Set Up
+## セットアップ
 
-This section describes how to set up this repository.
+ここで，本レポジトリのセットアップ方法について説明します．
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#readme-top">上に戻る</a>)</p>
 
 
-### Prerequisites
+### 環境条件
 
-First, please set up the following environment before proceeding to the next installation stage.
+まず，以下の環境を整えてから，次のインストール段階に進んでください．
 
 | System  | Version |
 | ------------- | ------------- |
@@ -72,32 +72,33 @@ First, please set up the following environment before proceeding to the next ins
 | Python | 3.8 |
 
 > [!NOTE]
-> If you need to install `Ubuntu` or `ROS`, please check our [SOBITS Manual](https://github.com/TeamSOBITS/sobits_manual#%E9%96%8B%E7%99%BA%E7%92%B0%E5%A2%83%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6).
+> `Ubuntu`や`ROS`のインストール方法に関しては，[SOBITS Manual](https://github.com/TeamSOBITS/sobits_manual#%E9%96%8B%E7%99%BA%E7%92%B0%E5%A2%83%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6)に参照してください．
+
+<p align="right">(<a href="#readme-top">上に戻る</a>)</p>
 
 
-<p align="right">(<a href="#readme-top">Back to top</a>)</p>
+### インストール方法
 
-
-### Installation
-
-1. Go to the `src` folder of ROS.
+1. ROSの`src`フォルダに移動します．
    ```sh
    $ roscd
-   # Or just use "cd ~/catkin_ws/" and change directory.
+   # もしくは，"cd ~/catkin_ws/"へ移動．
    $ cd src/
    ```
-2. Clone this repository.
+2. 本レポジトリをcloneします．
    ```sh
    $ git clone https://github.com/TeamSOBITS/hsr_sim_common
    ```
-3. Navigate into the repository.
+3. レポジトリの中へ移動します．
    ```sh
-   $ cd hsr_sim_common/
+   $ cd /hsr_sim_common
    ```
-4. Install the dependent packages.
+4. 依存パッケージをインストールします．
    ```sh
    $ bash install.sh
    ```
+   以下のコマンドを入力して，HSRを動かすための環境設定を行います．  
+   この設定は，初回のみに行う作業ですので，1度行ったことのある人は飛ばしてください．
 
     ```bash:
     $ roscd hsr_ros
@@ -105,48 +106,48 @@ First, please set up the following environment before proceeding to the next ins
     $ sudo ./install.sh
     ```
 
-5. Compile the package.
+5. パッケージをコンパイルします．
    ```sh
    $ roscd
-   # Or just use "cd ~/catkin_ws/" and change directory.
+   # もしくは，"cd ~/catkin_ws/"へ移動．
    $ catkin_make
    ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#readme-top">上に戻る</a>)</p>
+
 
 <!-- 実行・操作方法 -->
-## Launch and Usage
+## 実行・操作方法
 
-1. Set the parameters inside[minimal.launch](hsr_sim_common/launch/minimal.launch)and select the functions to launch with HSR
+1. HSRの起動する機能をパラメータとして[minimal.launch](hsr_sim_common/launch/minimal.launch)に設定します．
    ```xml
     roslaunch hsr_sim_common minimal.launch
     ...
    ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#readme-top">上に戻る</a>)</p>
 
 
-## Software
+## ソフトウェア
 
-### Grasp
-Please refer to `grasp.py` located in the `example` folder.
+### 物体把持
+exampleフォルダに入ってある, grasp.pyを参照してください.
 
-#### Function Descriptions
+#### 関数の説明
 
-1. `grasp_to_target_coord`
-   - A function that allows HSR to grasp an object located at the specified 3D coordinates.
+1. grasp_to_target_coord
+指定した3次元座標に存在する物体をHSRが把持する関数
 
-2. `open_gripper`
-   - A function to open the gripper.
+2. open_gripper
+グリッパーを開く関数
 
-3. `close_gripper`
-   - A function to close the gripper.
+3. close_gripper
+グリッパーを閉じる関数
 
-*Additional examples will be added as needed.*
+※ exampleに関しては随時追加予定です。
 
-### Changing Pose
-By calling the functions in `joint_controller.py` (`hsr_ros/src`) of the `hsr_ros` package, you can change the HSR to the following poses.
-
+### ポーズの変更
+hsr_rosパッケージのjoint_controller.py(hsr_ros/src)の関数を呼び出すことでHSRを以下のようなPose（姿勢）にすることができます.
 <div align="center">
  <p>
     <img src="hsr_ros/img/initial.png" title="initial_pose" width="280">
@@ -155,34 +156,38 @@ By calling the functions in `joint_controller.py` (`hsr_ros/src`) of the `hsr_ro
  </p>
 </div>
 
-#### ①initial_pose
-   - Purpose: Used when performing autonomous movement.
-   - Description: A pose that ensures the arm does not collide during movement.
-   - Function Name: `move_to_initial_pose` (`joint_controller.py`)
+左から
 
-#### ②detecting_pose
-   - Purpose: Used when performing object recognition.
-   - Description: A pose that ensures the arm does not appear within the camera frame during object recognition.
-   - Function Name: `move_to_detecting_pose` (`joint_controller.py`)
+#### ①initial_pose  
+用途：自律移動をする際に用いるpose(姿勢)  
+説明：アームが移動中に衝突しないようにする姿勢  
+関数名：move_to_initial_pose（joint_controller.py） 
 
-#### ③measurement_pose
-   - Purpose: Used when measuring the height of an object.
-   - Description: This pose allows for the measurement of object height, enabling safe object placement.
-   - Function Name: `move_to_measurement_pose` (`joint_controller.py`)
+#### ②detecting_pose  
+用途：物体認識の際に用いるpose(姿勢)  
+説明：物体を認識する際に，カメラのフレーム内にアームが映らないようにする姿勢  
+関数名：move_to_detecting_pose（joint_controller.py） 
 
-<p align="right">(<a href="#readme-top">Back to top</a>)</p>
+#### ③measurement_pose  
+用途：物体の高さを計測する際に用いるpose(姿勢)  
+説明：この姿勢を用いることで，物体の高さを求めることができ，安全な物体の配置が可能  
+関数名：move_to_measurement_pose（joint_controller.py）  
 
-<!-- Milestones -->
-## Milestones
 
-- [x] Modify example files
+<p align="right">(<a href="#readme-top">上に戻る</a>)</p>
+
+
+<!-- マイルストーン -->
+## マイルストーン
+
+- [x] exampleファイルの修正
 - [x] OSS
-    - [x] Enhance documentation
-    - [x] Unify coding style
+    - [x] ドキュメンテーションの充実
+    - [x] コーディングスタイルの統一
 
-To check the current bugs and new feature requests, please refer to the [Issue page][issues-url].
+現時点のバッグや新規機能の依頼を確認するために[Issueページ][issues-url] をご覧ください．
 
-<p align="right">(<a href="#readme-top">Back to top</a>)</p>
+<p align="right">(<a href="#readme-top">上に戻る</a>)</p>
 
 
 <!-- CONTRIBUTING -->
