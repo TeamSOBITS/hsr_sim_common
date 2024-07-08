@@ -100,7 +100,7 @@ First, please set up the following environment before proceeding to the next ins
    ```
 
     ```bash:
-    $ roscd hsr_ros
+    $ roscd hsr_sim_common
     $ chmod 755 install.sh
     $ sudo ./install.sh
     ```
@@ -145,13 +145,13 @@ Please refer to `grasp.py` located in the `example` folder.
 *Additional examples will be added as needed.*
 
 ### Changing Pose
-By calling the functions in `joint_controller.py` (`hsr_ros/src`) of the `hsr_ros` package, you can change the HSR to the following poses.
+By calling the functions in `joint_controller.py` (`hsr_sim_common/src`) of the `hsr_sim_common` package, you can change the HSR to the following poses.
 
 <div align="center">
  <p>
-    <img src="hsr_ros/img/initial.png" title="initial_pose" width="280">
-    <img src="hsr_ros/img/detect.png" title="detecting_pose" width="280"> 
-    <img src="hsr_ros/img/measure.png" title="measurement_pose" width="280"> 
+    <img src="hsr_sim_common/img/initial.png" title="initial_pose" width="280">
+    <img src="hsr_sim_common/img/detect.png" title="detecting_pose" width="280"> 
+    <img src="hsr_sim_common/img/measure.png" title="measurement_pose" width="280"> 
  </p>
 </div>
 

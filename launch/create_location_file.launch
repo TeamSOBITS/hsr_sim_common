@@ -1,0 +1,34 @@
+<launch>
+
+    <!--  ファイル名を指定するなら下記のargを変更すること -->
+    <arg name="map_file" default="$(find hsr_sim_common)/map/map.yaml"/>
+    <arg name="initial_pose_x" default="0.0"/>
+    <arg name="initial_pose_y" default="0.0"/>
+    <arg name="initial_pose_a" default="0.0"/>
+    <arg name="custom_param_file" default="$(find hsr_sim_common)/param/costmap_common_params.yaml"/>
+    <arg name="location_folder_path" default="$(find hsr_sim_common)/map"/>
+
+
+    <!-- Map server -->
+    <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+
+    <!-- AMCL -->
+    <include file="$(find hsr_sim_common)/launch/includes/amcl.launch.xml">
+        <arg name="initial_pose_x" value="$(arg initial_pose_x)"/>
+        <arg name="initial_pose_y" value="$(arg initial_pose_y)"/>
+        <arg name="initial_pose_a" value="$(arg initial_pose_a)"/>
+    </include>
+
+    <!-- Move_Base -->
+    <include file="$(find hsr_sim_common)/launch/includes/move_base.launch.xml"/>
+
+    <!-- pose_saver -->
+    <group ns = "pose_saver_hsr">
+        <param name="save_location_folder_path" type="string" value="$(arg location_folder_path)"/>
+        <node name="pose_saver" pkg="hsr_sim_common" type="pose_saver_hsr" output="screen"  launch-prefix="gnome-terminal -e" />
+    </group>
+
+    <!-- rviz -->
+    <include file="$(find turtlebot_rviz_launchers)/launch/view_navigation.launch"/>
+
+</launch>

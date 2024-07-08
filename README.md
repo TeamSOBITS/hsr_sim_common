@@ -101,7 +101,7 @@
    この設定は，初回のみに行う作業ですので，1度行ったことのある人は飛ばしてください．
 
     ```bash:
-    $ roscd hsr_ros
+    $ roscd hsr_sim_common
     $ chmod 755 install.sh
     $ sudo ./install.sh
     ```
@@ -147,12 +147,12 @@ exampleフォルダに入ってある, grasp.pyを参照してください.
 ※ exampleに関しては随時追加予定です。
 
 ### ポーズの変更
-hsr_rosパッケージのjoint_controller.py(hsr_ros/src)の関数を呼び出すことでHSRを以下のようなPose（姿勢）にすることができます.
+hsr_sim_commonパッケージのjoint_controller.py(hsr_sim_common/src)の関数を呼び出すことでHSRを以下のようなPose（姿勢）にすることができます.
 <div align="center">
  <p>
-    <img src="hsr_ros/img/initial.png" title="initial_pose" width="280">
-    <img src="hsr_ros/img/detect.png" title="detecting_pose" width="280"> 
-    <img src="hsr_ros/img/measure.png" title="measurement_pose" width="280"> 
+    <img src="hsr_sim_common/img/initial.png" title="initial_pose" width="280">
+    <img src="hsr_sim_common/img/detect.png" title="detecting_pose" width="280"> 
+    <img src="hsr_sim_common/img/measure.png" title="measurement_pose" width="280"> 
  </p>
 </div>
 

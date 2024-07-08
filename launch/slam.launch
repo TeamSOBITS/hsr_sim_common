@@ -1,0 +1,39 @@
+<launch>
+
+    <!--  ファイル名を指定するなら下記のargを変更すること -->
+    <arg name="map_file" default="$(find hsr_sim_common)/map/2018_0314_HSR.yaml"/>
+    <arg name="map_movebase_file" default="$(find hsr_sim_common)/map/2018_0314_HSR.yaml" />
+    <arg name="map_movebase_topic_name" default="map_movebase"/>
+    <arg name="location_file" default="$(find hsr_sim_common)/map/saved_location_3_15_23_51.yaml"/>
+    <arg name="initial_pose_x" default="0.0"/>
+    <arg name="initial_pose_y" default="0.0"/>
+    <arg name="initial_pose_a" default="0.0"/>
+    <arg name="waypoint_config_file" default="$(find hsr_sim_common)/param/waypoint_nav.yaml"/>
+
+    <!-- Map server -->
+    <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+
+    <node name="map_movebase_server" pkg="map_server" type="map_server" args="$(arg map_movebase_file)" >
+        <remap from="map" to="$(arg map_movebase_topic_name)" />
+        <remap from="static_map" to="static_map_movebase" />
+    </node>
+
+    <!-- AMCL -->
+    <include file="$(find hsr_sim_common)/launch/includes/amcl.launch.xml">
+        <arg name="initial_pose_x" value="$(arg initial_pose_x)"/>
+        <arg name="initial_pose_y" value="$(arg initial_pose_y)"/>
+        <arg name="initial_pose_a" value="$(arg initial_pose_a)"/>
+    </include>
+
+    <!-- Move_Base -->
+    <include file="$(find hsr_sim_common)/launch/includes/move_base.launch.xml">
+        <arg name="map_topic" value="$(arg map_movebase_topic_name)"/>
+    </include>
+
+    <group ns = "waypoint_nav">
+        <param name="location_yaml_path" type="string" value="$(arg location_file)"/>
+        <rosparam command="load" file="$(arg waypoint_config_file)"/>
+        <node pkg="hsr_sim_common" type="waypoint_nav_hsr" name="waypoint_nav"/>
+    </group>
+
+</launch>

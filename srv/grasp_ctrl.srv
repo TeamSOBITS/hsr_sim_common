@@ -1,0 +1,3 @@
+string req_str #掴んで欲しいオブジェクト名
+---
+bool res_bool #掴めたか否か
