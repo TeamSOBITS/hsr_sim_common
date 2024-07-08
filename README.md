@@ -104,6 +104,9 @@
     $ roscd hsr_sim_common
     $ chmod 755 install.sh
     $ sudo ./install.sh
+
+    $ roscd hsr_sim_common/src
+    $ chmod 755 *
     ```
 
 5. パッケージをコンパイルします．
