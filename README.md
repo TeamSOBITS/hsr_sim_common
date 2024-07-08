@@ -153,9 +153,9 @@ exampleフォルダに入ってある, grasp.pyを参照してください.
 hsr_sim_commonパッケージのjoint_controller.py(hsr_sim_common/src)の関数を呼び出すことでHSRを以下のようなPose（姿勢）にすることができます.
 <div align="center">
  <p>
-    <img src="hsr_sim_common/img/initial.png" title="initial_pose" width="280">
-    <img src="hsr_sim_common/img/detect.png" title="detecting_pose" width="280"> 
-    <img src="hsr_sim_common/img/measure.png" title="measurement_pose" width="280"> 
+    <img src="img/initial.png" title="initial_pose" width="280">
+    <img src="img/detect.png" title="detecting_pose" width="280"> 
+    <img src="img/measure.png" title="measurement_pose" width="280"> 
  </p>
 </div>
 
