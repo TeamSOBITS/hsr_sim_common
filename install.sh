@@ -1,5 +1,7 @@
 #! /bin/bash
 
+roscd
+
 echo "╔══╣ Install: HSR Description (STARTING) ╠══╗"
 cd ../
 
