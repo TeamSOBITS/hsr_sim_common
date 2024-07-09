@@ -1,6 +1,7 @@
 #! /bin/bash
 
 echo "╔══╣ Install: HSR Description (STARTING) ╠══╗"
+cd ../
 
 git clone https://github.com/TeamSOBITS/hsr_description.git
 

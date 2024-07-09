@@ -63,3 +63,4 @@ add_dependencies(waypoint_nav_hsr ${PROJECT_NAME}_generate_messages_cpp)
 
 add_executable(sub_obj_depth src/sub_obj_depth.cpp)
 target_link_libraries(sub_obj_depth ${catkin_LIBRARIES})
+
