@@ -1,0 +1,20 @@
+<launch>
+
+	<include file="$(find hsr_sim_common)/launch/generate_pointcloud.launch" />
+	<!--include file="$(find hsr_description)/robots/upload_hsrb.launch" /-->
+	<arg name="robot" default="hsrb4s" />
+
+	<!-- <param name="robot_description" command="$(find xacro)/xacro.py '$(find hsr_description)/robots/$(arg robot).urdf.xacro'" /> -->
+	<param name="robot_description" textfile="$(find hsr_description)/robots/hsrb4s.urdf" />
+
+	<!-- hsr_controller -->
+	<group ns = "robot_ctrl">
+		<node pkg="hsr_sim_common" type="odom_base_controller.py" name="hsr_controller" output="screen"/>
+		<!--node pkg="hsr_sim_common" type="grasp_obj_by_frame_hsr.py" name="grasp_obj_by_frame" output="screen"/-->
+		<node pkg="hsr_sim_common" type="joint_controller.py" name="joint_controller" output="screen"/>
+		<node pkg="hsr_sim_common" type="sub_obj_depth" name="sub_obj_depth" output="screen"/>
+	</group>
+
+	<!--node name="rviz" pkg="rviz" type="rviz" args="-d $(find hsr_sim_common)/rviz/display.rviz"/-->
+
+</launch>
