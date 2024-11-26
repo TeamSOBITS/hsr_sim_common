@@ -40,9 +40,9 @@ add_service_files(
 )
 
 generate_messages(
- DEPENDENCIES
- std_msgs
- geometry_msgs
+  DEPENDENCIES
+  std_msgs
+  geometry_msgs
 )
 
 catkin_package(
@@ -50,12 +50,13 @@ catkin_package(
 )
 
 include_directories(
-# include
   ${catkin_INCLUDE_DIRS}
+  ${CMAKE_SOURCE_DIR}/src/hsr_sim_common/include
 )
 
 add_executable(pose_saver_hsr src/pose_saver.cpp)
 target_link_libraries(pose_saver_hsr ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
+add_dependencies(pose_saver_hsr ${PROJECT_NAME}_generate_messages_cpp)
 
 add_executable(waypoint_nav_hsr src/waypoint_nav.cpp)
 target_link_libraries(waypoint_nav_hsr ${catkin_LIBRARIES})
@@ -63,4 +64,5 @@ add_dependencies(waypoint_nav_hsr ${PROJECT_NAME}_generate_messages_cpp)
 
 add_executable(sub_obj_depth src/sub_obj_depth.cpp)
 target_link_libraries(sub_obj_depth ${catkin_LIBRARIES})
+add_dependencies(sub_obj_depth ${PROJECT_NAME}_generate_messages_cpp)
 
