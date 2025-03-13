@@ -1,0 +1,4 @@
+string location_name
+geometry_msgs/Pose location_pose
+---
+string result_text

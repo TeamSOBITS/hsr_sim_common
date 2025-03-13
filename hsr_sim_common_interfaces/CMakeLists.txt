@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(hsr_sim_common)
+project(hsr_sim_common_interfaces)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -10,11 +10,6 @@ find_package(ament_cmake REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
-
-#-- for Launch
-install(DIRECTORY launch/
-DESTINATION share/${PROJECT_NAME}/launch)
-#--- end Launch
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
