@@ -7,6 +7,18 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(tf2_eigen REQUIRED)
+find_package(pcl_conversions REQUIRED)
+find_package(pcl_ros REQUIRED)
+find_package(hsr_sim_common_interfaces REQUIRED)
+find_package(visualization_msgs REQUIRED)
+find_package(nav2_msgs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -15,6 +27,107 @@ find_package(ament_cmake REQUIRED)
 install(DIRECTORY launch/
 DESTINATION share/${PROJECT_NAME}/launch)
 #--- end Launch
+
+add_executable(handyman_pose_saver src/handyman_pose_saver.cpp)
+ament_target_dependencies(handyman_pose_saver
+  rclcpp
+  tf2
+  tf2_ros
+  tf2_msgs
+  geometry_msgs
+)
+install(TARGETS
+  handyman_pose_saver
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+add_executable(pcl_scan_creater src/pcl_scan_creater.cpp)
+ament_target_dependencies(pcl_scan_creater
+  rclcpp
+  sensor_msgs
+  geometry_msgs
+  tf2
+  tf2_ros
+  tf2_eigen
+  pcl_conversions
+  pcl_ros
+)
+
+target_include_directories(pcl_scan_creater PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+  ${PCL_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIR}
+)
+
+target_link_libraries(pcl_scan_creater
+  ${PCL_LIBRARIES}
+)
+
+install(TARGETS pcl_scan_creater
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+add_executable(pose_saver src/pose_saver.cpp)
+ament_target_dependencies(pose_saver
+  rclcpp
+  tf2
+  tf2_ros
+  geometry_msgs
+)
+
+install(TARGETS
+  pose_saver
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+# add_executable(sub_obj_depth src/sub_obj_depth.cpp)
+# ament_target_dependencies(sub_obj_depth
+#   rclcpp
+#   tf2
+#   tf2_ros
+#   tf2_eigen
+#   tf2_geometry_msgs
+#   sensor_msgs
+#   pcl_conversions
+#   PCL
+#   hsr_sim_common_interfaces
+# )
+
+# target_include_directories(sub_obj_depth PUBLIC
+#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#   $<INSTALL_INTERFACE:include>
+#   ${PCL_INCLUDE_DIRS}
+# )
+
+# target_link_libraries(sub_obj_depth
+#   ${PCL_LIBRARIES}
+# )
+
+# install(TARGETS
+#   sub_obj_depth
+#   DESTINATION lib/${PROJECT_NAME}
+# )
+
+add_executable(waypoint_nav src/waypoint_nav.cpp)
+
+ament_target_dependencies(waypoint_nav
+  rclcpp
+  rclcpp_action
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
+  geometry_msgs
+  std_msgs
+  visualization_msgs
+  hsr_sim_common_interfaces     # provides waypoint_nav.srv, location_stock.msg
+  nav2_msgs     # provides nav2_msgs::action::MoveBase
+)
+
+install(TARGETS
+  waypoint_nav
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

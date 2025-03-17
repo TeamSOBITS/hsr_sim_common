@@ -7,9 +7,42 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(geometry_msgs REQUIRED)
+
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
+
+set(msg_files
+  "msg/LocationStock.msg"
+)
+
+set(srv_files
+  "srv/ArmHeight.srv"
+  "srv/DetectCtrl.srv"
+  "srv/GraspCtrl.srv"
+  "srv/GripperCtrl.srv"
+  "srv/GripperMove.srv"
+  "srv/IsGrasped.srv"
+  "srv/ObjDepth.srv"
+  "srv/OdomBase.srv"
+  "srv/PutCtrl.srv"
+  "srv/RobotMotion.srv"
+  "srv/WatchMotion.srv"
+  "srv/WaypointNav.srv"
+)
+
+set(action_files
+  # "action/AddTwoInts.action"
+)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  ${msg_files}
+  ${srv_files}
+  ${action_files}
+  DEPENDENCIES geometry_msgs 
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
