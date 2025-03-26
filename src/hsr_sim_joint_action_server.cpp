@@ -28,14 +28,10 @@ JointActionServer::JointActionServer(const rclcpp::NodeOptions & options = rclcp
       std::bind(&JointActionServer::handle_move_to_pose_accepted, this, std::placeholders::_1));
   this->service_server_move_hand_to_coord_left_ = this->create_service<MoveHandToTargetCoord>(
       "move_hand_to_coord",
-      [this](const std::shared_ptr<MoveHandToTargetCoord::Request> request, std::shared_ptr<MoveHandToTargetCoord::Response> response) {
-        serve_move_hand_to_coord(request, response, false);  // when target hand is left, 3rd arg is 'false'
-      });
+      std::bind(&JointActionServer::serve_move_hand_to_coord, this, std::placeholders::_1, std::placeholders::_2));
   this->service_server_move_hand_to_tf_left_ = this->create_service<MoveHandToTargetTF>(
       "move_hand_to_tf",
-      [this](const std::shared_ptr<MoveHandToTargetTF::Request> request, std::shared_ptr<MoveHandToTargetTF::Response> response) {
-        serve_move_hand_to_tf(request, response, false);  // when target hand is left, 3rd arg is 'false'
-      });
+      std::bind(&JointActionServer::serve_move_hand_to_tf, this, std::placeholders::_1, std::placeholders::_2));
 
   this->sub_joint_state_ = this->create_subscription<sensor_msgs::msg::JointState>(
       "(Jap) What is Topic Name??? SOBIT Series >> joint_states", qos_profile, std::bind(&JointActionServer::joint_state_callback, this, std::placeholders::_1));  // (Jap) 各Jointの今の角度を取得するcallback関数．型とTopic名がわからん．
