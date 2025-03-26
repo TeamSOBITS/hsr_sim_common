@@ -5,6 +5,12 @@ echo "╔══╣ Install: HSR SIM COMMON (STARTING) ╠══╗"
 # Keep track of the current directory
 DIR=$(pwd)
 
+cd $DIR/..
+git clone -b ${ROS_DISTRO}-devel https://github.com/TeamSOBITS/sobits_msgs.git
+cd sobits_msgs
+bash install.sh
+cd $DIR
+
 # Install mongo_c
 mkdir -p ~/mongo_c
 cd ~/mongo_c/
@@ -37,7 +43,8 @@ sudo apt-get update
 sudo apt-get install -y \
     ros-${ROS_DISTRO}-rosbridge-suite \
     ros-${ROS_DISTRO}-jsk-rviz-plugins \
-    ros-${ROS_DISTRO}-rosbridge-server
+    ros-${ROS_DISTRO}-rosbridge-server \
+    ros-${ROS_DISTRO}-nav2-msgs
 
 cd $DIR
 colcon build --symlink-install
