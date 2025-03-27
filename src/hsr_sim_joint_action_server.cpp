@@ -8,6 +8,7 @@ JointActionServer::JointActionServer(const rclcpp::NodeOptions & options = rclcp
   tf_listener_(std::make_shared<tf2_ros::TransformListener>(*tf_buffer_))
 {
   // Configure the QoS profile
+  // TODO //
   rclcpp::QoS qos_profile(1); // depth = 1
   qos_profile.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
   qos_profile.history(RMW_QOS_POLICY_HISTORY_KEEP_LAST);
@@ -26,18 +27,21 @@ JointActionServer::JointActionServer(const rclcpp::NodeOptions & options = rclcp
       std::bind(&JointActionServer::handle_move_to_pose_goal, this, std::placeholders::_1, std::placeholders::_2),
       std::bind(&JointActionServer::handle_move_to_pose_cancel, this, std::placeholders::_1),
       std::bind(&JointActionServer::handle_move_to_pose_accepted, this, std::placeholders::_1));
-  this->service_server_move_hand_to_coord_left_ = this->create_service<MoveHandToTargetCoord>(
+  this->service_server_move_hand_to_coord_ = this->create_service<MoveHandToTargetCoord>(
       "move_hand_to_coord",
       std::bind(&JointActionServer::serve_move_hand_to_coord, this, std::placeholders::_1, std::placeholders::_2));
-  this->service_server_move_hand_to_tf_left_ = this->create_service<MoveHandToTargetTF>(
+  this->service_server_move_hand_to_tf_ = this->create_service<MoveHandToTargetTF>(
       "move_hand_to_tf",
       std::bind(&JointActionServer::serve_move_hand_to_tf, this, std::placeholders::_1, std::placeholders::_2));
 
   this->sub_joint_state_ = this->create_subscription<sensor_msgs::msg::JointState>(
-      "(Jap) What is Topic Name??? SOBIT Series >> joint_states", qos_profile, std::bind(&JointActionServer::joint_state_callback, this, std::placeholders::_1));  // (Jap) 各Jointの今の角度を取得するcallback関数．型とTopic名がわからん．
-  this->pub_joint_control_ = this->create_publisher<trajectory_msgs::msg::JointTrajectory>(
-      "(Jap) What is Topic Name??? SOBIT Series >> joint_trajectory_controller/joint_trajectory", qos_profile);   // (Jap) 各Jointに角度をPublishする．そもそもHSRがPublishなのかわからん．もしPublishならTopic名を．
-  // (Jap) ↑Simの場合はTopic名にName Spaceがないから最初に"/"を入れるといいと思う
+      "/hsrb/joint_states", qos_profile, std::bind(&JointActionServer::joint_state_callback, this, std::placeholders::_1));  // (Jap) 各Jointの今の角度を取得するcallback関数．型とTopic名がわからん．
+  this->pub_joint_control_head_ = this->create_publisher<trajectory_msgs::msg::JointTrajectory>(
+      "/hsrb/head_trajectory_controller/command", qos_profile);
+  this->pub_joint_control_arm_ = this->create_publisher<trajectory_msgs::msg::JointTrajectory>(
+      "/hsrb/arm_trajectory_controller/command", qos_profile);
+  this->pub_joint_control_hand_ = this->create_publisher<trajectory_msgs::msg::JointTrajectory>(
+      "/hsrb/gripper_controller/command", qos_profile);
 
   //Declare the pose parameters
 
@@ -47,38 +51,28 @@ JointActionServer::JointActionServer(const rclcpp::NodeOptions & options = rclcp
   poses_.clear();
   for (auto pose_name : pose_names) { // (Jap) pose_list.yamlに書いた通りの各Joint("_joint"なし)を以下に書く
     // Declare parameters for each pose
-    this->declare_parameter(pose_name + ".r_arm_shoulder_roll", rclcpp::PARAMETER_DOUBLE);
-    this->declare_parameter(pose_name + ".r_arm_shoulder_pan" , rclcpp::PARAMETER_DOUBLE);
-    this->declare_parameter(pose_name + ".r_arm_elbow_tilt"   , rclcpp::PARAMETER_DOUBLE);
-    this->declare_parameter(pose_name + ".r_arm_wrist_tilt"   , rclcpp::PARAMETER_DOUBLE);
-    this->declare_parameter(pose_name + ".r_hand"             , rclcpp::PARAMETER_DOUBLE);
-    this->declare_parameter(pose_name + ".l_arm_shoulder_roll", rclcpp::PARAMETER_DOUBLE);
-    this->declare_parameter(pose_name + ".l_arm_shoulder_pan" , rclcpp::PARAMETER_DOUBLE);
-    this->declare_parameter(pose_name + ".l_arm_elbow_tilt"   , rclcpp::PARAMETER_DOUBLE);
-    this->declare_parameter(pose_name + ".l_arm_wrist_tilt"   , rclcpp::PARAMETER_DOUBLE);
-    this->declare_parameter(pose_name + ".l_hand"             , rclcpp::PARAMETER_DOUBLE);
-    this->declare_parameter(pose_name + ".body_roll"          , rclcpp::PARAMETER_DOUBLE);
-    this->declare_parameter(pose_name + ".head_camera_pan"    , rclcpp::PARAMETER_DOUBLE);
-    this->declare_parameter(pose_name + ".head_camera_tilt"   , rclcpp::PARAMETER_DOUBLE);
+    this->declare_parameter(pose_name + ".arm_lift"               , rclcpp::PARAMETER_DOUBLE);
+    this->declare_parameter(pose_name + ".arm_flex"               , rclcpp::PARAMETER_DOUBLE);
+    this->declare_parameter(pose_name + ".arm_roll"               , rclcpp::PARAMETER_DOUBLE);
+    this->declare_parameter(pose_name + ".wrist_flex"             , rclcpp::PARAMETER_DOUBLE);
+    this->declare_parameter(pose_name + ".wrist_roll"             , rclcpp::PARAMETER_DOUBLE);
+    this->declare_parameter(pose_name + ".head_pan"               , rclcpp::PARAMETER_DOUBLE);
+    this->declare_parameter(pose_name + ".head_tilt"              , rclcpp::PARAMETER_DOUBLE);
+    this->declare_parameter(pose_name + ".hand_l_spring_proximal" , rclcpp::PARAMETER_DOUBLE);
+    // this->declare_parameter(pose_name + ".hand_r_spring_proximal"   , rclcpp::PARAMETER_DOUBLE);
 
     // Read parameters for each pose
-    // (Jap) "="の左：hsr_sim_joint_action_server.hppの中のPoseParamsで定義した変数
-    // (Jap) "="の右：上の[pose_name + ".---"]と同じ．
     PoseParams params;
-    params.pose_name           = pose_name;
-    params.r_arm_shoulder_roll = this->get_parameter(pose_name + ".r_arm_shoulder_roll").as_double();
-    params.r_arm_shoulder_pan  = this->get_parameter(pose_name + ".r_arm_shoulder_pan").as_double();
-    params.r_arm_elbow_tilt    = this->get_parameter(pose_name + ".r_arm_elbow_tilt").as_double();
-    params.r_arm_wrist_tilt    = this->get_parameter(pose_name + ".r_arm_wrist_tilt").as_double();
-    params.r_hand              = this->get_parameter(pose_name + ".r_hand").as_double();
-    params.l_arm_shoulder_roll = this->get_parameter(pose_name + ".l_arm_shoulder_roll").as_double();
-    params.l_arm_shoulder_pan  = this->get_parameter(pose_name + ".l_arm_shoulder_pan").as_double();
-    params.l_arm_elbow_tilt    = this->get_parameter(pose_name + ".l_arm_elbow_tilt").as_double();
-    params.l_arm_wrist_tilt    = this->get_parameter(pose_name + ".l_arm_wrist_tilt").as_double();
-    params.l_hand              = this->get_parameter(pose_name + ".l_hand").as_double();
-    params.body_roll           = this->get_parameter(pose_name + ".body_roll").as_double();
-    params.head_camera_pan     = this->get_parameter(pose_name + ".head_camera_pan").as_double();
-    params.head_camera_tilt    = this->get_parameter(pose_name + ".head_camera_tilt").as_double();
+    params.pose_name              = pose_name;
+    params.arm_lift               = this->get_parameter(pose_name + ".arm_lift").as_double();
+    params.arm_flex               = this->get_parameter(pose_name + ".arm_flex").as_double();
+    params.arm_roll               = this->get_parameter(pose_name + ".arm_roll").as_double();
+    params.wrist_flex             = this->get_parameter(pose_name + ".wrist_flex").as_double();
+    params.wrist_roll             = this->get_parameter(pose_name + ".wrist_roll").as_double();
+    params.head_pan               = this->get_parameter(pose_name + ".head_pan").as_double();
+    params.head_tilt              = this->get_parameter(pose_name + ".head_tilt").as_double();
+    params.hand_l_spring_proximal = this->get_parameter(pose_name + ".hand_l_spring_proximal").as_double();
+    // params.hand_r_spring_proximal    = this->get_parameter(pose_name + ".hand_r_spring_proximal").as_double();
 
     poses_.push_back(params);
   }
@@ -91,7 +85,9 @@ JointActionServer::~JointActionServer()
   this->action_server_move_to_pose_.reset();
 
   this->sub_joint_state_.reset();
-  this->pub_joint_control_.reset();
+  this->pub_joint_control_head_.reset();
+  this->pub_joint_control_arm_.reset();
+  this->pub_joint_control_hand_.reset();
 
   RCLCPP_INFO(this->get_logger(), "JointActionServer has been terminated.");
 }
@@ -186,11 +182,12 @@ void JointActionServer::exe_move_joints(
   // TODO: Check if the joint rad are within the joint limits
 
   // Publish the joint trajectory
-  trajectory_msgs::msg::JointTrajectory joint_trajectory;
-  joint_trajectory = set_joints(goal->target_joint_names, goal->target_joint_rad, goal->time_allowance);
+  std::vector<trajectory_msgs::msg::JointTrajectory> joint_trajectorys = set_joints(goal->target_joint_names, goal->target_joint_rad, goal->time_allowance);
 
   try {
-    this->pub_joint_control_->publish(joint_trajectory);
+    this->pub_joint_control_head_->publish(joint_trajectorys[0]);
+    this->pub_joint_control_arm_->publish(joint_trajectorys[1]);
+    this->pub_joint_control_hand_->publish(joint_trajectorys[2]);
   } catch (const std::exception &ex) {
     RCLCPP_ERROR(this->get_logger(), "Failed to publish the joint trajectory: %s", ex.what());
 
@@ -220,7 +217,10 @@ void JointActionServer::exe_move_joints(
       builtin_interfaces::msg::Duration dt;
       dt.sec = 0;
       dt.nanosec = static_cast<uint32_t>(0.1 * 10E9);
-      this->pub_joint_control_->publish(set_joints({}, {}, dt));
+      std::vector<trajectory_msgs::msg::JointTrajectory> stop_joints = set_joints({}, {}, dt);
+      this->pub_joint_control_head_->publish(stop_joints[0]);
+      this->pub_joint_control_arm_->publish(stop_joints[1]);
+      this->pub_joint_control_hand_->publish(stop_joints[2]);
 
       return;
     }
@@ -291,19 +291,14 @@ void JointActionServer::exe_move_to_pose(
   std::vector<double> target_joint_rad;
   for (const auto &pose : poses_) {
     if (pose.pose_name == goal->pose_name) {  // (Jap) 71行目〜85行目と同じ感じで以下に書く
-      target_joint_rad.push_back(pose.r_arm_shoulder_roll);
-      target_joint_rad.push_back(pose.r_arm_shoulder_pan);
-      target_joint_rad.push_back(pose.r_arm_elbow_tilt);
-      target_joint_rad.push_back(pose.r_arm_wrist_tilt);
-      target_joint_rad.push_back(pose.r_hand);
-      target_joint_rad.push_back(pose.l_arm_shoulder_roll);
-      target_joint_rad.push_back(pose.l_arm_shoulder_pan);
-      target_joint_rad.push_back(pose.l_arm_elbow_tilt);
-      target_joint_rad.push_back(pose.l_arm_wrist_tilt);
-      target_joint_rad.push_back(pose.l_hand);
-      target_joint_rad.push_back(pose.body_roll);
-      target_joint_rad.push_back(pose.head_camera_pan);
-      target_joint_rad.push_back(pose.head_camera_tilt);
+      target_joint_rad.push_back(pose.arm_lift);
+      target_joint_rad.push_back(pose.arm_flex);
+      target_joint_rad.push_back(pose.arm_roll);
+      target_joint_rad.push_back(pose.wrist_flex);
+      target_joint_rad.push_back(pose.wrist_roll);
+      target_joint_rad.push_back(pose.head_pan);
+      target_joint_rad.push_back(pose.head_tilt);
+      target_joint_rad.push_back(pose.hand_l_spring_proximal);
       break;
     }
   }
@@ -319,11 +314,12 @@ void JointActionServer::exe_move_to_pose(
   }
 
   // Publish the joint trajectory
-  trajectory_msgs::msg::JointTrajectory joint_trajectory;
-  joint_trajectory = set_joints(JointNames, target_joint_rad, goal->time_allowance);
+  std::vector<trajectory_msgs::msg::JointTrajectory> joint_trajectorys = set_joints(JointNames, target_joint_rad, goal->time_allowance);
 
   try {
-    this->pub_joint_control_->publish(joint_trajectory);
+    this->pub_joint_control_head_->publish(joint_trajectorys[0]);
+    this->pub_joint_control_arm_->publish(joint_trajectorys[1]);
+    this->pub_joint_control_hand_->publish(joint_trajectorys[2]);
   } catch (const std::exception &ex) {
     RCLCPP_ERROR(this->get_logger(), "Failed to publish the joint trajectory: %s", ex.what());
 
@@ -353,7 +349,10 @@ void JointActionServer::exe_move_to_pose(
       builtin_interfaces::msg::Duration dt;
       dt.sec = 0;
       dt.nanosec = static_cast<uint32_t>(0.1 * 10E9);
-      this->pub_joint_control_->publish(set_joints({}, {}, dt));
+      std::vector<trajectory_msgs::msg::JointTrajectory> stop_joints = set_joints({}, {}, dt);
+      this->pub_joint_control_head_->publish(stop_joints[0]);
+      this->pub_joint_control_arm_->publish(stop_joints[1]);
+      this->pub_joint_control_hand_->publish(stop_joints[2]);
   
       return;
     }
@@ -425,35 +424,6 @@ void JointActionServer::serve_move_hand_to_coord(
 
     return;
   }
-
-  // SOBIT MINIならではの例外．物体が近すぎるので回転じゃどうにもならない場合．
-  double r = std::sqrt(std::pow(BaseToShoulderDX, 2) + std::pow(BaseToShoulderDY, 2));
-  if ((std::pow(goal_coord.transform.translation.x,2)+std::pow(goal_coord.transform.translation.y,2)-std::pow(r,2)) < 0) {
-
-    response->success = false;
-    response->message = "[FAIL] The coordinates are too close to the robot.";
-    response->target_joint_names.clear();
-    response->target_joint_rad.clear();
-
-    return;
-  }
-
-  // target_yawにロボットの回転角度を代入
-  // calculate the target_yaw to move base of grasping object 
-  double target_linear, target_yaw;
-  double shoulder_rotate_x, shoulder_rotate_y;
-  if (is_right) {
-    shoulder_rotate_x = (std::pow(r, 2)*goal_coord.transform.translation.x + r*goal_coord.transform.translation.y*std::sqrt(std::pow(goal_coord.transform.translation.x,2)+std::pow(goal_coord.transform.translation.y,2)-std::pow(r,2))) / (std::pow(goal_coord.transform.translation.x,2) + std::pow(goal_coord.transform.translation.y,2));
-    shoulder_rotate_y = (std::pow(r, 2)*goal_coord.transform.translation.y - r*goal_coord.transform.translation.x*std::sqrt(std::pow(goal_coord.transform.translation.x,2)+std::pow(goal_coord.transform.translation.y,2)-std::pow(r,2))) / (std::pow(goal_coord.transform.translation.x,2) + std::pow(goal_coord.transform.translation.y,2));
-    target_yaw =  M_PI / 2. + std::atan2(shoulder_rotate_y, shoulder_rotate_x);
-  } else {
-    shoulder_rotate_x = (std::pow(r, 2)*goal_coord.transform.translation.x - r*goal_coord.transform.translation.y*std::sqrt(std::pow(goal_coord.transform.translation.x,2)+std::pow(goal_coord.transform.translation.y,2)-std::pow(r,2))) / (std::pow(goal_coord.transform.translation.x,2) + std::pow(goal_coord.transform.translation.y,2));
-    shoulder_rotate_y = (std::pow(r, 2)*goal_coord.transform.translation.y + r*goal_coord.transform.translation.x*std::sqrt(std::pow(goal_coord.transform.translation.x,2)+std::pow(goal_coord.transform.translation.y,2)-std::pow(r,2))) / (std::pow(goal_coord.transform.translation.x,2) + std::pow(goal_coord.transform.translation.y,2));
-    target_yaw = -M_PI / 2. + std::atan2(shoulder_rotate_y, shoulder_rotate_x);
-  }
-  // 3次元の逆運動学が完成したらtarget_yawはある一定の条件で0(=回転する必要なし)になる
-
-
   // Inverse kinematics to get the target joint rad
   // (Jap) target_joint_namesに逆運動学に関して稼働する関節をhsr_sim_joint_action_server.hppのJointNamesから選んで指定する．
   std::vector<std::string> target_joint_names = {};
@@ -587,11 +557,13 @@ void JointActionServer::joint_state_callback(
   const sensor_msgs::msg::JointState::SharedPtr msg)
 {
   for (size_t i = 0; i < msg->name.size(); i++) {
+    if (msg->name[i] == "hand_r_spring_proximal_joint") continue;  // Skip sub joints
+
     this->curt_joint_state_[msg->name[i]] = msg->position[i];
   }
 }
 
-trajectory_msgs::msg::JointTrajectory JointActionServer::set_joints(
+std::vector<trajectory_msgs::msg::JointTrajectory> JointActionServer::set_joints(
   const std::vector<std::string> &target_joint_names,
   const std::vector<double> &target_joint_rad,
   const builtin_interfaces::msg::Duration &time_allowance)
@@ -608,16 +580,51 @@ trajectory_msgs::msg::JointTrajectory JointActionServer::set_joints(
     full_target_joint_rad[std::distance(JointNames.begin(), it)] = target_joint_rad[i];
   }
 
-  auto joint_trajectory = trajectory_msgs::msg::JointTrajectory();
-  joint_trajectory.header.stamp = this->now();
-  joint_trajectory.points.resize(1);
-  joint_trajectory.points[0].time_from_start = time_allowance;
+  auto joint_trajectory_head = trajectory_msgs::msg::JointTrajectory();
+  auto joint_trajectory_arm  = trajectory_msgs::msg::JointTrajectory();
+  auto joint_trajectory_hand = trajectory_msgs::msg::JointTrajectory();
+  joint_trajectory_head.header.stamp = this->now();
+  joint_trajectory_head.points.resize(1);
+  joint_trajectory_head.points[0].time_from_start = time_allowance;
+  joint_trajectory_arm.header.stamp = this->now();
+  joint_trajectory_arm.points.resize(1);
+  joint_trajectory_arm.points[0].time_from_start = time_allowance;
+  joint_trajectory_hand.header.stamp = this->now();
+  joint_trajectory_hand.points.resize(1);
+  joint_trajectory_hand.points[0].time_from_start = time_allowance;
   for (size_t i = 0; i < JointNames.size(); i++) {
-    joint_trajectory.points[0].positions.push_back(full_target_joint_rad[i]);
-    joint_trajectory.joint_names.push_back(JointNames[i]);
+    for (size_t j = 0; j < JointNamesHead.size(); j++) {
+      if (JointNames[i] == JointNamesHead[j]) {
+        joint_trajectory_head.points[0].positions.push_back(full_target_joint_rad[i]);
+        joint_trajectory_head.joint_names.push_back(JointNames[i]);
+        break;
+      }
+    }
+
+    for (size_t j = 0; j < JointNamesArm.size(); j++) {
+      if (JointNames[i] == JointNamesArm[j]) {
+        joint_trajectory_arm.points[0].positions.push_back(full_target_joint_rad[i]);
+        joint_trajectory_arm.joint_names.push_back(JointNames[i]);
+        break;
+      }
+    }
+
+    for (size_t j = 0; j < JointNamesHand.size(); j++) {
+      if (JointNames[i] == JointNamesHand[j]) {
+        joint_trajectory_hand.points[0].positions.push_back(full_target_joint_rad[i]);
+        joint_trajectory_hand.joint_names.push_back(JointNames[i]);
+        // Add sub joints
+        if (JointNames[i] == JointNames[JointIds::HandLSpringProximal]) {
+          joint_trajectory_hand.points[0].positions.push_back(-full_target_joint_rad[i]);
+          joint_trajectory_hand.joint_names.push_back("hand_r_spring_proximal_joint");
+        }
+        break;
+      }
+    }
+
   }
 
-  return joint_trajectory;
+  return {joint_trajectory_head, joint_trajectory_arm, joint_trajectory_hand};
 }
 
 // (Jap) target_joint_radによって手先の座標がいくつになるのかをfinal_coordに代入
@@ -638,3 +645,31 @@ std::vector<double> JointActionServer::inverse_kinematics(
 }
 
 } // namespace hsr_sim
+
+/*
+ros2_ws sobits@:~$ ros2 topic list -t 
+/client_count [std_msgs/msg/Int32]
+/connected_clients [rosbridge_msgs/msg/ConnectedClients]
+/hsrb/arm_trajectory_controller/command [trajectory_msgs/msg/JointTrajectory]
+/hsrb/gripper_controller/command [trajectory_msgs/msg/JointTrajectory]
+/hsrb/head_trajectory_controller/command [trajectory_msgs/msg/JointTrajectory]
+/hsrb/omni_base_controller/command [trajectory_msgs/msg/JointTrajectory]
+/hsrb/base_scan [sensor_msgs/msg/LaserScan]
+/hsrb/command_velocity [geometry_msgs/msg/Twist]
+/hsrb/hand_camera/camera_info [sensor_msgs/msg/CameraInfo]
+/hsrb/hand_camera/image_raw [sensor_msgs/msg/Image]
+/hsrb/head_center_camera/camera_info [sensor_msgs/msg/CameraInfo]
+/hsrb/head_center_camera/image_raw [sensor_msgs/msg/Image]
+/hsrb/head_l_stereo_camera/camera_info [sensor_msgs/msg/CameraInfo]
+/hsrb/head_l_stereo_camera/image_rect_color [sensor_msgs/msg/Image]
+/hsrb/head_r_stereo_camera/camera_info [sensor_msgs/msg/CameraInfo]
+/hsrb/head_r_stereo_camera/image_rect_color [sensor_msgs/msg/Image]
+/hsrb/head_rgbd_sensor/depth_registered/camera_info [sensor_msgs/msg/CameraInfo]
+/hsrb/head_rgbd_sensor/depth_registered/image_raw [sensor_msgs/msg/Image]
+/hsrb/head_rgbd_sensor/rgb/camera_info [sensor_msgs/msg/CameraInfo]
+/hsrb/head_rgbd_sensor/rgb/image_raw [sensor_msgs/msg/Image]
+/hsrb/joint_states [sensor_msgs/msg/JointState]
+/parameter_events [rcl_interfaces/msg/ParameterEvent]
+/rosout [rcl_interfaces/msg/Log]
+/tf [tf2_msgs/msg/TFMessage]
+*/

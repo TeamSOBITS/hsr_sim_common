@@ -1,6 +1,6 @@
-#include "sobit_mini_library/sobit_mini_wheel_action_server.hpp"
+#include "hsr_sim_library/hsr_sim_wheel_action_server.hpp"
 
-namespace sobit_mini{
+namespace hsr_sim{
 
 WheelActionServer::WheelActionServer(const rclcpp::NodeOptions & options = rclcpp::NodeOptions())
 : Node("wheel_action_server", options)
@@ -331,4 +331,4 @@ void WheelActionServer::odom_callback(
       this->curt_odom_.pose.pose.orientation.w);
 }
 
-} // namespace sobit_mini
+} // namespace hsr_sim

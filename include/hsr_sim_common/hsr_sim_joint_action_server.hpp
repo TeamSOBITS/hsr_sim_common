@@ -32,36 +32,27 @@ namespace hsr_sim
 struct PoseParams   // (Jap) HSRのJointへ適宜以下に変数を作る．Jointで構成された型みたいな感じ．"_joint"はいらない
 {
   std::string pose_name;
-  double r_arm_shoulder_roll;
-  double r_arm_shoulder_pan;
-  double r_arm_elbow_tilt;
-  double r_arm_wrist_tilt;
-  double r_hand;
-  double l_arm_shoulder_roll;
-  double l_arm_shoulder_pan;
-  double l_arm_elbow_tilt;
-  double l_arm_wrist_tilt;
-  double l_hand;
-  double body_roll;
-  double head_camera_pan;
-  double head_camera_tilt;
+    double arm_lift;
+    double arm_flex;
+    double arm_roll;
+    double wrist_flex;
+    double wrist_roll;
+    double head_pan;
+    double head_tilt;
+    double hand_l_spring_proximal;
+    // double hand_r_spring_proximal;
 };
 
 enum JointIds // (Jap) PoseParams1つ1つに0,1,2,,,って数字を割り振ってあげている感じ．最後のJointNumを忘れない．
 {
-  R_ArmShoulderRollJoint = 0,
-  R_ArmShoulderPanJoint,
-  R_ArmElbowTiltJoint,
-  R_ArmWristTiltJoint,
-  R_HandJoint,
-  L_ArmShoulderRollJoint,
-  L_ArmShoulderPanJoint,
-  l_ArmElbowTiltJoint,
-  L_ArmWristTiltJoint,
-  L_HandJoint,
-  BodyRollJoint,
-  HeadCameraPanJoint,
-  HeadCameraTiltJoint,
+  ArmLift = 0, // GRASPER
+  ArmFlex,     // GRASPER
+  ArmRoll,
+  WristFlex,   // GRASPER
+  WristRoll,
+  HeadPan,
+  HeadTilt,
+  HandLSpringProximal,
   JointNum
 };
 
@@ -87,34 +78,64 @@ public:
     const std::vector<double> &target_joint_rad);
   std::vector<double> inverse_kinematics(
     const geometry_msgs::msg::TransformStamped &goal_coord);
-  trajectory_msgs::msg::JointTrajectory set_joints(
+  std::vector<trajectory_msgs::msg::JointTrajectory> set_joints(
     const std::vector<std::string> &target_joint_names,
     const std::vector<double> &target_joint_rad,
     const builtin_interfaces::msg::Duration &time_allowance);
 
 private:
-  const std::vector<std::string> JointNames = { // (Jap) HSRのJointへ適宜以下の名前を変える．pose_list.yamlと違い"_joint"を付ける
-    "r_arm_shoulder_roll_joint",
-    "r_arm_shoulder_pan_joint",
-    "r_arm_elbow_tilt_joint",
-    "r_arm_wrist_tilt_joint",
-    "r_hand_joint",
-    "l_arm_shoulder_roll_joint",
-    "l_arm_shoulder_pan_joint",
-    "l_arm_elbow_tilt_joint",
-    "l_arm_wrist_tilt_joint",
-    "l_hand_joint",
-    "body_roll_joint",
-    "head_camera_pan_joint",
-    "head_camera_tilt_joint"
+  const std::vector<std::string> JointNames = {
+    "arm_lift_joint",
+    "arm_flex_joint",
+    "arm_roll_joint",
+    "wrist_flex_joint",
+    "wrist_roll_joint",
+    "head_pan_joint",
+    "head_tilt_joint",
+    "hand_l_spring_proximal_joint"
+    // "hand_r_spring_proximal_joint"
+  };
+  const std::vector<std::string> JointNamesHead = {
+    // "arm_lift_joint",
+    // "arm_flex_joint",
+    // "arm_roll_joint",
+    // "wrist_flex_joint",
+    // "wrist_roll_joint",
+    "head_pan_joint",
+    "head_tilt_joint",
+    // "hand_l_spring_proximal_joint"
+    // // "hand_r_spring_proximal_joint"
+  };
+  const std::vector<std::string> JointNamesArm = {
+    "arm_lift_joint",
+    "arm_flex_joint",
+    "arm_roll_joint",
+    "wrist_flex_joint",
+    "wrist_roll_joint",
+    // "head_pan_joint",
+    // "head_tilt_joint",
+    // "hand_l_spring_proximal_joint"
+    // // "hand_r_spring_proximal_joint"
+  };
+  const std::vector<std::string> JointNamesHand = {
+    // "arm_lift_joint",
+    // "arm_flex_joint",
+    // "arm_roll_joint",
+    // "wrist_flex_joint",
+    // "wrist_roll_joint",
+    // "head_pan_joint",
+    // "head_tilt_joint",
+    "hand_l_spring_proximal_joint"
+    // "hand_r_spring_proximal_joint"
   };
 
-  static constexpr double BaseToShoulderDX    = 0.0;
-  static constexpr double BaseToShoulderDY    = 0.195;
-  static constexpr double BaseToShoulderDZ    = 0.705;
-  static constexpr double LengthShoulderElbow = 0.113;
-  static constexpr double LengthElbowWrist    = 0.105;
-  static constexpr double LengthHand          = 0.165;
+  // TODO //
+  // static constexpr double BaseToShoulderDX    = 0.0;
+  // static constexpr double BaseToShoulderDY    = 0.195;
+  // static constexpr double BaseToShoulderDZ    = 0.705;
+  // static constexpr double LengthShoulderElbow = 0.113;
+  // static constexpr double LengthElbowWrist    = 0.105;
+  // static constexpr double LengthHand          = 0.165;
 
   std::vector<PoseParams> poses_;
   std::map<std::string, double> init_joint_state_;
@@ -122,10 +143,8 @@ private:
 
   rclcpp_action::Server<MoveJoint>::SharedPtr action_server_move_joints_;
   rclcpp_action::Server<MoveToPose>::SharedPtr action_server_move_to_pose_;
-  rclcpp::Service<MoveHandToTargetCoord>::SharedPtr service_server_move_hand_to_coord_left_;
-  rclcpp::Service<MoveHandToTargetTF>::SharedPtr service_server_move_hand_to_tf_left_;
-  rclcpp::Service<MoveHandToTargetCoord>::SharedPtr service_server_move_hand_to_coord_right_;
-  rclcpp::Service<MoveHandToTargetTF>::SharedPtr service_server_move_hand_to_tf_right_;
+  rclcpp::Service<MoveHandToTargetCoord>::SharedPtr service_server_move_hand_to_coord_;
+  rclcpp::Service<MoveHandToTargetTF>::SharedPtr service_server_move_hand_to_tf_;
 
   rclcpp_action::GoalResponse handle_move_joints_goal(const rclcpp_action::GoalUUID & uuid, std::shared_ptr<const MoveJoint::Goal> goal);
   rclcpp_action::GoalResponse handle_move_to_pose_goal(const rclcpp_action::GoalUUID & uuid, std::shared_ptr<const MoveToPose::Goal> goal);
@@ -141,8 +160,10 @@ private:
   void serve_move_hand_to_coord(const std::shared_ptr<MoveHandToTargetCoord::Request> request, std::shared_ptr<MoveHandToTargetCoord::Response> response);
   void serve_move_hand_to_tf(const std::shared_ptr<MoveHandToTargetTF::Request> request, std::shared_ptr<MoveHandToTargetTF::Response> response);
 
-  rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr pub_joint_control_;  // (Jap) HSR-SIMはどのようにJointを動かすのかわからないが，Publish系ならこのままで大丈夫
-  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr sub_joint_state_;  // (Jap) HSRは各Jointの今の角度をどのように取得できるのかわからないが，もしもこの前言ってた「Joint Stateが得られない」ってんならヤバい．Subscribeできるならそのままでオッケー．
+  rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr pub_joint_control_head_;
+  rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr pub_joint_control_arm_;
+  rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr pub_joint_control_hand_;
+  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr sub_joint_state_;
 
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;

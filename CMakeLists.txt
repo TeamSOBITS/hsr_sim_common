@@ -33,40 +33,40 @@ find_package(tf2_ros REQUIRED)
 include_directories(include)
 
 # Library
-# add_library(${PROJECT_NAME} SHARED
-#   src/hsr_sim_joint_action_server.cpp
-#   src/hsr_sim_wheel_action_server.cpp
-# )
+add_library(${PROJECT_NAME} SHARED
+  src/hsr_sim_joint_action_server.cpp
+  # src/hsr_sim_wheel_action_server.cpp
+)
 
 
-# rclcpp_components_register_node(${PROJECT_NAME}
-#   PLUGIN "hsr_sim::JointActionServer"
-#   EXECUTABLE joint_action_server)
+rclcpp_components_register_node(${PROJECT_NAME}
+  PLUGIN "hsr_sim::JointActionServer"
+  EXECUTABLE joint_action_server)
 
 # rclcpp_components_register_node(${PROJECT_NAME}
 #   PLUGIN "hsr_sim::WheelActionServer"
 #   EXECUTABLE wheel_action_server)
 
 
-# ament_target_dependencies(${PROJECT_NAME}
-#   "rclcpp"
-#   "rclcpp_action"
-#   "rclcpp_components"
-#   "sobits_interfaces"
-#   "std_msgs"
-#   "sensor_msgs"
-#   "geometry_msgs"
-#   "nav_msgs"
-#   "trajectory_msgs"
-#   "tf2_geometry_msgs"
-#   "tf2_ros"
-#   "tf2")
+ament_target_dependencies(${PROJECT_NAME}
+  "rclcpp"
+  "rclcpp_action"
+  "rclcpp_components"
+  "sobits_interfaces"
+  "std_msgs"
+  "sensor_msgs"
+  "geometry_msgs"
+  "nav_msgs"
+  "trajectory_msgs"
+  "tf2_geometry_msgs"
+  "tf2_ros"
+  "tf2")
 
 
-# install(TARGETS ${PROJECT_NAME}
-#   ARCHIVE DESTINATION lib
-#   LIBRARY DESTINATION lib
-#   RUNTIME DESTINATION bin)
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
 
 
 #############

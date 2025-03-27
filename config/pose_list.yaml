@@ -4,32 +4,24 @@
       - initial_pose
       - detecting_pose
 
-    initial_pose:   # HSRのJointへ適宜以下の名前を変える．"_joint"は要らない
-      r_arm_shoulder_roll :  0.0
-      r_arm_shoulder_pan  :  1.25
-      r_arm_elbow_tilt    :  0.0
-      r_arm_wrist_tilt    :  0.0
-      r_hand              :  0.0
-      l_arm_shoulder_roll :  0.0
-      l_arm_shoulder_pan  : -1.25
-      l_arm_elbow_tilt    :  0.0
-      l_arm_wrist_tilt    :  0.0
-      l_hand              :  0.0
-      body_roll           :  0.0
-      head_camera_pan     :  0.0
-      head_camera_tilt    :  0.0
+    initial_pose:
+      arm_lift               :  0.0
+      arm_flex               :  0.0
+      arm_roll               :  0.0
+      wrist_flex             : -1.57
+      wrist_roll             :  0.0
+      head_pan               :  0.0
+      head_tilt              :  0.0
+      hand_l_spring_proximal :  0.0
+      # hand_r_spring_proximal :  0.0
 
     detecting_pose:
-      r_arm_shoulder_roll : -0.78
-      r_arm_shoulder_pan  :  1.25
-      r_arm_elbow_tilt    :  1.57
-      r_arm_wrist_tilt    :  1.57
-      r_hand              :  0.0
-      l_arm_shoulder_roll :  0.78
-      l_arm_shoulder_pan  : -1.25
-      l_arm_elbow_tilt    : -1.57
-      l_arm_wrist_tilt    : -1.57
-      l_hand              :  0.0
-      body_roll           :  0.0
-      head_camera_pan     :  0.0
-      head_camera_tilt    :  0.4 # -0.4
+      arm_lift               :  0.5
+      arm_flex               :  0.0
+      arm_roll               :  0.0
+      wrist_flex             : -1.57
+      wrist_roll             :  0.0
+      head_pan               :  0.0
+      head_tilt              :  -0.3
+      hand_l_spring_proximal :  1.0
+      # hand_r_spring_proximal :  0.0
