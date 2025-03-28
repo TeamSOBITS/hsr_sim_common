@@ -8,9 +8,8 @@ JointActionServer::JointActionServer(const rclcpp::NodeOptions & options = rclcp
   tf_listener_(std::make_shared<tf2_ros::TransformListener>(*tf_buffer_))
 {
   // Configure the QoS profile
-  // TODO //
   rclcpp::QoS qos_profile(1); // depth = 1
-  qos_profile.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
+  qos_profile.reliability(RMW_QOS_POLICY_RELIABILITY_RELIABLE);
   qos_profile.history(RMW_QOS_POLICY_HISTORY_KEEP_LAST);
   qos_profile.durability(RMW_QOS_POLICY_DURABILITY_VOLATILE);
 
@@ -435,7 +434,7 @@ void JointActionServer::serve_move_hand_to_coord(
   if (target_joint_rad.size() == 0) {
 
     response->success = false;
-    response->message = "[FAIL] The target position is too low or tall (z: 0.0[m] <= Grasp Able <= 1.4[m])"; // (Jap) ←みたいなメッセージを入れて把持が無理なことをメッセージする．
+    response->message = "[FAIL] The target position is too tall (z: 0.0[m] <= Grasp Able <= 1.38[m])"; // (Jap) ←みたいなメッセージを入れて把持が無理なことをメッセージする．
     response->target_joint_names.clear();
     response->target_joint_rad.clear();
 
@@ -632,6 +631,16 @@ geometry_msgs::msg::TransformStamped JointActionServer::forward_kinematics(
   const std::vector<double> &target_joint_rad)
 {
   geometry_msgs::msg::TransformStamped final_coord; // (Jap) final_coordはbase_footprint基準の座標系とする
+
+  final_coord.transform.translation.x = LengthArmLiftToWristFlex * std::sin(-target_joint_rad[1]) + LengthWristFlexToHand;
+  final_coord.transform.translation.y = 0;
+  final_coord.transform.translation.z = target_joint_rad[0] + LengthArmLiftToWristFlex * std::cos(-target_joint_rad[1]);
+
+  final_coord.transform.rotation.w = 1.;
+  final_coord.transform.rotation.x = 0.;
+  final_coord.transform.rotation.y = 0.;
+  final_coord.transform.rotation.z = 0.;
+
   return final_coord;
 }
 
@@ -640,7 +649,34 @@ geometry_msgs::msg::TransformStamped JointActionServer::forward_kinematics(
 std::vector<double> JointActionServer::inverse_kinematics(
   const geometry_msgs::msg::TransformStamped &goal_coord) // (Jap) goal_coordはbase_footprint基準の座標系とする
 {
-  std::vector<double> target_joint_rad = {};
+  // "arm_lift_joint","arm_flex_joint", "wrist_flex_joint"
+  std::vector<double> target_joint_rad = {0.0, -M_PI/2., 0.0};
+
+  if ((BaseToArmLiftMax + LengthArmLiftToWristFlex) < goal_coord.transform.translation.z) {
+    RCLCPP_WARN(this->get_logger(), "The target position is too tall (max:%.2f[m] < %.2f[m])", BaseToArmLiftMax + LengthArmLiftToWristFlex + LengthWristFlexToHand, goal_coord.transform.translation.z);
+    target_joint_rad.clear();
+    return target_joint_rad;
+  }
+
+  // ほぼ床くらいの高さならば・・・(ArmLiftMinより下)
+  if ((goal_coord.transform.translation.z < BaseToArmLiftMin)) {
+    target_joint_rad[0] = 0.0;
+    target_joint_rad[1] = -(M_PI - std::acos((BaseToArmLiftMin - goal_coord.transform.translation.z) / LengthArmLiftToWristFlex));
+    target_joint_rad[2] = -(target_joint_rad[1] + (M_PI / 2));
+  }
+  // ほぼ肘くらいの高さならば・・・(ArmLiftMaxより下でArmLiftMinより上)
+  else if ((BaseToArmLiftMin <= goal_coord.transform.translation.z) && (goal_coord.transform.translation.z <= BaseToArmLiftMax)) {
+    target_joint_rad[0] = goal_coord.transform.translation.z - BaseToArmLiftMin;
+    target_joint_rad[1] = -M_PI / 2;
+    target_joint_rad[2] = 0.0;
+  }
+  // ほぼ肩くらいの高さならば・・・(ArmLiftMaxより上)
+  else if (BaseToArmLiftMax < goal_coord.transform.translation.z) {
+    target_joint_rad[0] = LengthLift;
+    target_joint_rad[1] = -std::acos((goal_coord.transform.translation.z - BaseToArmLiftMax) / LengthArmLiftToWristFlex);
+    target_joint_rad[2] = -((M_PI / 2) + target_joint_rad[1]);
+  }
+
   return target_joint_rad;
 }
 

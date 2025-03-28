@@ -129,13 +129,11 @@ private:
     // "hand_r_spring_proximal_joint"
   };
 
-  // TODO //
-  // static constexpr double BaseToShoulderDX    = 0.0;
-  // static constexpr double BaseToShoulderDY    = 0.195;
-  // static constexpr double BaseToShoulderDZ    = 0.705;
-  // static constexpr double LengthShoulderElbow = 0.113;
-  // static constexpr double LengthElbowWrist    = 0.105;
-  // static constexpr double LengthHand          = 0.165;
+  static constexpr double BaseToArmLiftMin         = 0.34;
+  static constexpr double LengthLift               = 0.69;
+  static constexpr double BaseToArmLiftMax         = BaseToArmLiftMin + LengthLift;
+  static constexpr double LengthArmLiftToWristFlex = 0.35;
+  static constexpr double LengthWristFlexToHand    = 0.19;
 
   std::vector<PoseParams> poses_;
   std::map<std::string, double> init_joint_state_;
