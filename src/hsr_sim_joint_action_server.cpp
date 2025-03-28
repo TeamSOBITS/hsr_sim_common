@@ -34,13 +34,9 @@ JointActionServer::JointActionServer(const rclcpp::NodeOptions & options = rclcp
       std::bind(&JointActionServer::serve_move_hand_to_tf, this, std::placeholders::_1, std::placeholders::_2));
 
   this->sub_joint_state_ = this->create_subscription<sensor_msgs::msg::JointState>(
-      "/hsrb/joint_states", qos_profile, std::bind(&JointActionServer::joint_state_callback, this, std::placeholders::_1));  // (Jap) 各Jointの今の角度を取得するcallback関数．型とTopic名がわからん．
-  this->pub_joint_control_head_ = this->create_publisher<trajectory_msgs::msg::JointTrajectory>(
-      "/hsrb/head_trajectory_controller/command", qos_profile);
-  this->pub_joint_control_arm_ = this->create_publisher<trajectory_msgs::msg::JointTrajectory>(
+      "/hsrb/joint_states", qos_profile, std::bind(&JointActionServer::joint_state_callback, this, std::placeholders::_1));
+  this->pub_joint_control_ = this->create_publisher<trajectory_msgs::msg::JointTrajectory>(
       "/hsrb/arm_trajectory_controller/command", qos_profile);
-  this->pub_joint_control_hand_ = this->create_publisher<trajectory_msgs::msg::JointTrajectory>(
-      "/hsrb/gripper_controller/command", qos_profile);
 
   //Declare the pose parameters
 
@@ -48,30 +44,28 @@ JointActionServer::JointActionServer(const rclcpp::NodeOptions & options = rclcp
   auto pose_names = this->get_parameter("poses").as_string_array();
 
   poses_.clear();
-  for (auto pose_name : pose_names) { // (Jap) pose_list.yamlに書いた通りの各Joint("_joint"なし)を以下に書く
+  for (auto pose_name : pose_names) {
     // Declare parameters for each pose
-    this->declare_parameter(pose_name + ".arm_lift"               , rclcpp::PARAMETER_DOUBLE);
-    this->declare_parameter(pose_name + ".arm_flex"               , rclcpp::PARAMETER_DOUBLE);
-    this->declare_parameter(pose_name + ".arm_roll"               , rclcpp::PARAMETER_DOUBLE);
-    this->declare_parameter(pose_name + ".wrist_flex"             , rclcpp::PARAMETER_DOUBLE);
-    this->declare_parameter(pose_name + ".wrist_roll"             , rclcpp::PARAMETER_DOUBLE);
-    this->declare_parameter(pose_name + ".head_pan"               , rclcpp::PARAMETER_DOUBLE);
-    this->declare_parameter(pose_name + ".head_tilt"              , rclcpp::PARAMETER_DOUBLE);
-    this->declare_parameter(pose_name + ".hand_l_spring_proximal" , rclcpp::PARAMETER_DOUBLE);
-    // this->declare_parameter(pose_name + ".hand_r_spring_proximal"   , rclcpp::PARAMETER_DOUBLE);
+    this->declare_parameter(pose_name + ".arm_lift"   , rclcpp::PARAMETER_DOUBLE);
+    this->declare_parameter(pose_name + ".arm_flex"   , rclcpp::PARAMETER_DOUBLE);
+    this->declare_parameter(pose_name + ".arm_roll"   , rclcpp::PARAMETER_DOUBLE);
+    this->declare_parameter(pose_name + ".wrist_flex" , rclcpp::PARAMETER_DOUBLE);
+    this->declare_parameter(pose_name + ".wrist_roll" , rclcpp::PARAMETER_DOUBLE);
+    this->declare_parameter(pose_name + ".head_pan"   , rclcpp::PARAMETER_DOUBLE);
+    this->declare_parameter(pose_name + ".head_tilt"  , rclcpp::PARAMETER_DOUBLE);
+    this->declare_parameter(pose_name + ".hand_motor" , rclcpp::PARAMETER_DOUBLE);
 
     // Read parameters for each pose
     PoseParams params;
-    params.pose_name              = pose_name;
-    params.arm_lift               = this->get_parameter(pose_name + ".arm_lift").as_double();
-    params.arm_flex               = this->get_parameter(pose_name + ".arm_flex").as_double();
-    params.arm_roll               = this->get_parameter(pose_name + ".arm_roll").as_double();
-    params.wrist_flex             = this->get_parameter(pose_name + ".wrist_flex").as_double();
-    params.wrist_roll             = this->get_parameter(pose_name + ".wrist_roll").as_double();
-    params.head_pan               = this->get_parameter(pose_name + ".head_pan").as_double();
-    params.head_tilt              = this->get_parameter(pose_name + ".head_tilt").as_double();
-    params.hand_l_spring_proximal = this->get_parameter(pose_name + ".hand_l_spring_proximal").as_double();
-    // params.hand_r_spring_proximal    = this->get_parameter(pose_name + ".hand_r_spring_proximal").as_double();
+    params.pose_name  = pose_name;
+    params.arm_lift   = this->get_parameter(pose_name + ".arm_lift").as_double();
+    params.arm_flex   = this->get_parameter(pose_name + ".arm_flex").as_double();
+    params.arm_roll   = this->get_parameter(pose_name + ".arm_roll").as_double();
+    params.wrist_flex = this->get_parameter(pose_name + ".wrist_flex").as_double();
+    params.wrist_roll = this->get_parameter(pose_name + ".wrist_roll").as_double();
+    params.head_pan   = this->get_parameter(pose_name + ".head_pan").as_double();
+    params.head_tilt  = this->get_parameter(pose_name + ".head_tilt").as_double();
+    params.hand_motor = this->get_parameter(pose_name + ".hand_motor").as_double();
 
     poses_.push_back(params);
   }
@@ -84,9 +78,7 @@ JointActionServer::~JointActionServer()
   this->action_server_move_to_pose_.reset();
 
   this->sub_joint_state_.reset();
-  this->pub_joint_control_head_.reset();
-  this->pub_joint_control_arm_.reset();
-  this->pub_joint_control_hand_.reset();
+  this->pub_joint_control_.reset();
 
   RCLCPP_INFO(this->get_logger(), "JointActionServer has been terminated.");
 }
@@ -184,9 +176,9 @@ void JointActionServer::exe_move_joints(
   std::vector<trajectory_msgs::msg::JointTrajectory> joint_trajectorys = set_joints(goal->target_joint_names, goal->target_joint_rad, goal->time_allowance);
 
   try {
-    this->pub_joint_control_head_->publish(joint_trajectorys[0]);
-    this->pub_joint_control_arm_->publish(joint_trajectorys[1]);
-    this->pub_joint_control_hand_->publish(joint_trajectorys[2]);
+    this->pub_joint_control_->publish(joint_trajectorys[0]);
+    this->pub_joint_control_->publish(joint_trajectorys[1]);
+    this->pub_joint_control_->publish(joint_trajectorys[2]);
   } catch (const std::exception &ex) {
     RCLCPP_ERROR(this->get_logger(), "Failed to publish the joint trajectory: %s", ex.what());
 
@@ -217,9 +209,9 @@ void JointActionServer::exe_move_joints(
       dt.sec = 0;
       dt.nanosec = static_cast<uint32_t>(0.1 * 10E9);
       std::vector<trajectory_msgs::msg::JointTrajectory> stop_joints = set_joints({}, {}, dt);
-      this->pub_joint_control_head_->publish(stop_joints[0]);
-      this->pub_joint_control_arm_->publish(stop_joints[1]);
-      this->pub_joint_control_hand_->publish(stop_joints[2]);
+      this->pub_joint_control_->publish(stop_joints[0]);
+      this->pub_joint_control_->publish(stop_joints[1]);
+      this->pub_joint_control_->publish(stop_joints[2]);
 
       return;
     }
@@ -289,7 +281,7 @@ void JointActionServer::exe_move_to_pose(
   // Get the target joint rad from the pose name
   std::vector<double> target_joint_rad;
   for (const auto &pose : poses_) {
-    if (pose.pose_name == goal->pose_name) {  // (Jap) 71行目〜85行目と同じ感じで以下に書く
+    if (pose.pose_name == goal->pose_name) {
       target_joint_rad.push_back(pose.arm_lift);
       target_joint_rad.push_back(pose.arm_flex);
       target_joint_rad.push_back(pose.arm_roll);
@@ -297,7 +289,7 @@ void JointActionServer::exe_move_to_pose(
       target_joint_rad.push_back(pose.wrist_roll);
       target_joint_rad.push_back(pose.head_pan);
       target_joint_rad.push_back(pose.head_tilt);
-      target_joint_rad.push_back(pose.hand_l_spring_proximal);
+      target_joint_rad.push_back(pose.hand_motor);
       break;
     }
   }
@@ -316,9 +308,9 @@ void JointActionServer::exe_move_to_pose(
   std::vector<trajectory_msgs::msg::JointTrajectory> joint_trajectorys = set_joints(JointNames, target_joint_rad, goal->time_allowance);
 
   try {
-    this->pub_joint_control_head_->publish(joint_trajectorys[0]);
-    this->pub_joint_control_arm_->publish(joint_trajectorys[1]);
-    this->pub_joint_control_hand_->publish(joint_trajectorys[2]);
+    this->pub_joint_control_->publish(joint_trajectorys[0]);
+    this->pub_joint_control_->publish(joint_trajectorys[1]);
+    this->pub_joint_control_->publish(joint_trajectorys[2]);
   } catch (const std::exception &ex) {
     RCLCPP_ERROR(this->get_logger(), "Failed to publish the joint trajectory: %s", ex.what());
 
@@ -349,9 +341,9 @@ void JointActionServer::exe_move_to_pose(
       dt.sec = 0;
       dt.nanosec = static_cast<uint32_t>(0.1 * 10E9);
       std::vector<trajectory_msgs::msg::JointTrajectory> stop_joints = set_joints({}, {}, dt);
-      this->pub_joint_control_head_->publish(stop_joints[0]);
-      this->pub_joint_control_arm_->publish(stop_joints[1]);
-      this->pub_joint_control_hand_->publish(stop_joints[2]);
+      this->pub_joint_control_->publish(stop_joints[0]);
+      this->pub_joint_control_->publish(stop_joints[1]);
+      this->pub_joint_control_->publish(stop_joints[2]);
   
       return;
     }
@@ -424,17 +416,14 @@ void JointActionServer::serve_move_hand_to_coord(
     return;
   }
   // Inverse kinematics to get the target joint rad
-  // (Jap) target_joint_namesに逆運動学に関して稼働する関節をhsr_sim_joint_action_server.hppのJointNamesから選んで指定する．
-  std::vector<std::string> target_joint_names = {};
-  // (Jap) target_joint_namesの関節順にtarget_joint_radに角度が入る
+  std::vector<std::string> target_joint_names = {"arm_lift_joint", "arm_felx_joint", "arm_roll_joint", "wrist_flex_joint", "wrist_roll_joint"};
   std::vector<double> target_joint_rad = inverse_kinematics(goal_coord);
 
   // If inverse kinematics is outside the range of possible
-  // (Jap) target_joint_radが空っぽということは，逆運動学可能範囲外なので・・・
   if (target_joint_rad.size() == 0) {
 
     response->success = false;
-    response->message = "[FAIL] The target position is too tall (z: 0.0[m] <= Grasp Able <= 1.38[m])"; // (Jap) ←みたいなメッセージを入れて把持が無理なことをメッセージする．
+    response->message = "[FAIL] The target position is too tall (z: 0.0[m] <= Grasp Able <= 1.38[m])";
     response->target_joint_names.clear();
     response->target_joint_rad.clear();
 
@@ -517,17 +506,14 @@ void JointActionServer::serve_move_hand_to_tf(
   }
 
   // Inverse kinematics to get the target joint rad
-  // (Jap) target_joint_namesに逆運動学に関して稼働する関節をhsr_sim_joint_action_server.hppのJointNamesから選んで指定する．
-  std::vector<std::string> target_joint_names = {};
-  // (Jap) target_joint_namesの関節順にtarget_joint_radに角度が入る
+  std::vector<std::string> target_joint_names = {"arm_lift_joint", "arm_felx_joint", "arm_roll_joint", "wrist_flex_joint", "wrist_roll_joint"};
   std::vector<double> target_joint_rad = inverse_kinematics(goal_coord);
 
   // If inverse kinematics is outside the range of possible
-  // (Jap) target_joint_radが空っぽということは，逆運動学可能範囲外なので・・・
   if (target_joint_rad.size() == 0) {
 
     response->success = false;
-    response->message = "[FAIL] The target position is too low or tall (z: 0.0[m] <= Grasp Able <= 1.4[m])"; // (Jap) ←みたいなメッセージを入れて把持が無理なことをメッセージする．
+    response->message = "[FAIL] The target position is too low or tall (z: 0.0[m] <= Grasp Able <= 1.4[m])"; 
     response->target_joint_names.clear();
     response->target_joint_rad.clear();
 
@@ -556,9 +542,13 @@ void JointActionServer::joint_state_callback(
   const sensor_msgs::msg::JointState::SharedPtr msg)
 {
   for (size_t i = 0; i < msg->name.size(); i++) {
-    if (msg->name[i] == "hand_r_spring_proximal_joint") continue;  // Skip sub joints
+    if (msg->name[i] == "hand_r_spring_proximal_joint") {
+      continue;  // Skip sub joints
+    }
 
-    this->curt_joint_state_[msg->name[i]] = msg->position[i];
+    //  Rename joints  (hand_l_spring_proximal_joint >> hand_motor_joint)
+    if (msg->name[i] == "hand_l_spring_proximal_joint") this->curt_joint_state_["hand_motor_joint"] = msg->position[i];
+    else                                                this->curt_joint_state_[msg->name[i]] = msg->position[i];
   }
 }
 
@@ -612,11 +602,6 @@ std::vector<trajectory_msgs::msg::JointTrajectory> JointActionServer::set_joints
       if (JointNames[i] == JointNamesHand[j]) {
         joint_trajectory_hand.points[0].positions.push_back(full_target_joint_rad[i]);
         joint_trajectory_hand.joint_names.push_back(JointNames[i]);
-        // Add sub joints
-        if (JointNames[i] == JointNames[JointIds::HandLSpringProximal]) {
-          joint_trajectory_hand.points[0].positions.push_back(-full_target_joint_rad[i]);
-          joint_trajectory_hand.joint_names.push_back("hand_r_spring_proximal_joint");
-        }
         break;
       }
     }
@@ -626,31 +611,28 @@ std::vector<trajectory_msgs::msg::JointTrajectory> JointActionServer::set_joints
   return {joint_trajectory_head, joint_trajectory_arm, joint_trajectory_hand};
 }
 
-// (Jap) target_joint_radによって手先の座標がいくつになるのかをfinal_coordに代入
 geometry_msgs::msg::TransformStamped JointActionServer::forward_kinematics(
   const std::vector<double> &target_joint_rad)
 {
-  geometry_msgs::msg::TransformStamped final_coord; // (Jap) final_coordはbase_footprint基準の座標系とする
+  geometry_msgs::msg::TransformStamped final_coord;
 
-  final_coord.transform.translation.x = LengthArmLiftToWristFlex * std::sin(-target_joint_rad[1]) + LengthWristFlexToHand;
+  final_coord.transform.translation.x = BaseToArmLengthX + LengthArmLiftToWristFlex * std::sin(-target_joint_rad[1]) + LengthWristFlexToHand;
   final_coord.transform.translation.y = 0;
-  final_coord.transform.translation.z = target_joint_rad[0] + LengthArmLiftToWristFlex * std::cos(-target_joint_rad[1]);
+  final_coord.transform.translation.z = BaseToArmLiftMin + target_joint_rad[0] + LengthArmLiftToWristFlex * std::cos(-target_joint_rad[1]);
 
   final_coord.transform.rotation.w = 1.;
   final_coord.transform.rotation.x = 0.;
   final_coord.transform.rotation.y = 0.;
   final_coord.transform.rotation.z = 0.;
-
   return final_coord;
 }
 
-// (Jap) goal_coordの座標へ逆運動学する．ただしx,yはロボットごと移動して位置合わせをするので実質zだけで逆運動学する．
-// (Jap) target_joint_radに各関節がいくつになるのかをvectorで代入 = size()は固定なはず <==> 把持適応範囲外のときはtarget_joint_rad.clear()をして空っぽで返す．
+
 std::vector<double> JointActionServer::inverse_kinematics(
-  const geometry_msgs::msg::TransformStamped &goal_coord) // (Jap) goal_coordはbase_footprint基準の座標系とする
+  const geometry_msgs::msg::TransformStamped &goal_coord)
 {
-  // "arm_lift_joint","arm_flex_joint", "wrist_flex_joint"
-  std::vector<double> target_joint_rad = {0.0, -M_PI/2., 0.0};
+  // "arm_lift_joint", "arm_felx_joint", "arm_roll_joint", "wrist_flex_joint", "wrist_roll_joint"
+  std::vector<double> target_joint_rad = {0.0, -M_PI/2., 0.0, 0.0, 0.0};
 
   if ((BaseToArmLiftMax + LengthArmLiftToWristFlex) < goal_coord.transform.translation.z) {
     RCLCPP_WARN(this->get_logger(), "The target position is too tall (max:%.2f[m] < %.2f[m])", BaseToArmLiftMax + LengthArmLiftToWristFlex + LengthWristFlexToHand, goal_coord.transform.translation.z);
@@ -660,18 +642,21 @@ std::vector<double> JointActionServer::inverse_kinematics(
 
   // ほぼ床くらいの高さならば・・・(ArmLiftMinより下)
   if ((goal_coord.transform.translation.z < BaseToArmLiftMin)) {
+    RCLCPP_INFO(this->get_logger(), "The target position is lower than ArmLiftMin");
     target_joint_rad[0] = 0.0;
     target_joint_rad[1] = -(M_PI - std::acos((BaseToArmLiftMin - goal_coord.transform.translation.z) / LengthArmLiftToWristFlex));
     target_joint_rad[2] = -(target_joint_rad[1] + (M_PI / 2));
   }
   // ほぼ肘くらいの高さならば・・・(ArmLiftMaxより下でArmLiftMinより上)
   else if ((BaseToArmLiftMin <= goal_coord.transform.translation.z) && (goal_coord.transform.translation.z <= BaseToArmLiftMax)) {
+    RCLCPP_INFO(this->get_logger(), "The target position is around the ArmLift");
     target_joint_rad[0] = goal_coord.transform.translation.z - BaseToArmLiftMin;
     target_joint_rad[1] = -M_PI / 2;
     target_joint_rad[2] = 0.0;
   }
   // ほぼ肩くらいの高さならば・・・(ArmLiftMaxより上)
   else if (BaseToArmLiftMax < goal_coord.transform.translation.z) {
+    RCLCPP_INFO(this->get_logger(), "The target position is higher than ArmLiftMax");
     target_joint_rad[0] = LengthLift;
     target_joint_rad[1] = -std::acos((goal_coord.transform.translation.z - BaseToArmLiftMax) / LengthArmLiftToWristFlex);
     target_joint_rad[2] = -((M_PI / 2) + target_joint_rad[1]);
@@ -681,31 +666,3 @@ std::vector<double> JointActionServer::inverse_kinematics(
 }
 
 } // namespace hsr_sim
-
-/*
-ros2_ws sobits@:~$ ros2 topic list -t 
-/client_count [std_msgs/msg/Int32]
-/connected_clients [rosbridge_msgs/msg/ConnectedClients]
-/hsrb/arm_trajectory_controller/command [trajectory_msgs/msg/JointTrajectory]
-/hsrb/gripper_controller/command [trajectory_msgs/msg/JointTrajectory]
-/hsrb/head_trajectory_controller/command [trajectory_msgs/msg/JointTrajectory]
-/hsrb/omni_base_controller/command [trajectory_msgs/msg/JointTrajectory]
-/hsrb/base_scan [sensor_msgs/msg/LaserScan]
-/hsrb/command_velocity [geometry_msgs/msg/Twist]
-/hsrb/hand_camera/camera_info [sensor_msgs/msg/CameraInfo]
-/hsrb/hand_camera/image_raw [sensor_msgs/msg/Image]
-/hsrb/head_center_camera/camera_info [sensor_msgs/msg/CameraInfo]
-/hsrb/head_center_camera/image_raw [sensor_msgs/msg/Image]
-/hsrb/head_l_stereo_camera/camera_info [sensor_msgs/msg/CameraInfo]
-/hsrb/head_l_stereo_camera/image_rect_color [sensor_msgs/msg/Image]
-/hsrb/head_r_stereo_camera/camera_info [sensor_msgs/msg/CameraInfo]
-/hsrb/head_r_stereo_camera/image_rect_color [sensor_msgs/msg/Image]
-/hsrb/head_rgbd_sensor/depth_registered/camera_info [sensor_msgs/msg/CameraInfo]
-/hsrb/head_rgbd_sensor/depth_registered/image_raw [sensor_msgs/msg/Image]
-/hsrb/head_rgbd_sensor/rgb/camera_info [sensor_msgs/msg/CameraInfo]
-/hsrb/head_rgbd_sensor/rgb/image_raw [sensor_msgs/msg/Image]
-/hsrb/joint_states [sensor_msgs/msg/JointState]
-/parameter_events [rcl_interfaces/msg/ParameterEvent]
-/rosout [rcl_interfaces/msg/Log]
-/tf [tf2_msgs/msg/TFMessage]
-*/

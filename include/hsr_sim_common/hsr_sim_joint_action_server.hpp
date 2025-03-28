@@ -29,7 +29,7 @@
 namespace hsr_sim
 {
 
-struct PoseParams   // (Jap) HSRのJointへ適宜以下に変数を作る．Jointで構成された型みたいな感じ．"_joint"はいらない
+struct PoseParams
 {
   std::string pose_name;
     double arm_lift;
@@ -39,20 +39,19 @@ struct PoseParams   // (Jap) HSRのJointへ適宜以下に変数を作る．Join
     double wrist_roll;
     double head_pan;
     double head_tilt;
-    double hand_l_spring_proximal;
-    // double hand_r_spring_proximal;
+    double hand_motor;
 };
 
-enum JointIds // (Jap) PoseParams1つ1つに0,1,2,,,って数字を割り振ってあげている感じ．最後のJointNumを忘れない．
+enum JointIds
 {
   ArmLift = 0, // GRASPER
   ArmFlex,     // GRASPER
-  ArmRoll,
+  ArmRoll,     // GRASPER
   WristFlex,   // GRASPER
-  WristRoll,
+  WristRoll,   // GRASPER
   HeadPan,
   HeadTilt,
-  HandLSpringProximal,
+  HandMotor,
   JointNum
 };
 
@@ -92,8 +91,7 @@ private:
     "wrist_roll_joint",
     "head_pan_joint",
     "head_tilt_joint",
-    "hand_l_spring_proximal_joint"
-    // "hand_r_spring_proximal_joint"
+    "hand_motor_joint"
   };
   const std::vector<std::string> JointNamesHead = {
     // "arm_lift_joint",
@@ -103,8 +101,7 @@ private:
     // "wrist_roll_joint",
     "head_pan_joint",
     "head_tilt_joint",
-    // "hand_l_spring_proximal_joint"
-    // // "hand_r_spring_proximal_joint"
+    // "hand_motor_joint"
   };
   const std::vector<std::string> JointNamesArm = {
     "arm_lift_joint",
@@ -114,8 +111,7 @@ private:
     "wrist_roll_joint",
     // "head_pan_joint",
     // "head_tilt_joint",
-    // "hand_l_spring_proximal_joint"
-    // // "hand_r_spring_proximal_joint"
+    // "hand_motor_joint"
   };
   const std::vector<std::string> JointNamesHand = {
     // "arm_lift_joint",
@@ -125,10 +121,10 @@ private:
     // "wrist_roll_joint",
     // "head_pan_joint",
     // "head_tilt_joint",
-    "hand_l_spring_proximal_joint"
-    // "hand_r_spring_proximal_joint"
+    "hand_motor_joint"
   };
 
+  static constexpr double BaseToArmLengthX         = 0.141;
   static constexpr double BaseToArmLiftMin         = 0.34;
   static constexpr double LengthLift               = 0.69;
   static constexpr double BaseToArmLiftMax         = BaseToArmLiftMin + LengthLift;
@@ -158,15 +154,13 @@ private:
   void serve_move_hand_to_coord(const std::shared_ptr<MoveHandToTargetCoord::Request> request, std::shared_ptr<MoveHandToTargetCoord::Response> response);
   void serve_move_hand_to_tf(const std::shared_ptr<MoveHandToTargetTF::Request> request, std::shared_ptr<MoveHandToTargetTF::Response> response);
 
-  rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr pub_joint_control_head_;
-  rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr pub_joint_control_arm_;
-  rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr pub_joint_control_hand_;
+  rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr pub_joint_control_;
   rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr sub_joint_state_;
 
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
-  void joint_state_callback(const sensor_msgs::msg::JointState::SharedPtr msg); // (Jap) 各Jointの今の角度を取得するcallback関数．型はこれで変わりないかな？？
+  void joint_state_callback(const sensor_msgs::msg::JointState::SharedPtr msg);
 }; // class JointActionServer
 
 inline geometry_msgs::msg::Vector3 JointActionServer::get_euler_from_quat(
