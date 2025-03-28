@@ -3,25 +3,67 @@
     poses:
       - initial_pose
       - detecting_pose
+      - low_detecting_pose
+      - lowest_detecting_pose
+      - mesurment_pose
+      - detecting_box_pose
 
     initial_pose:
-      arm_lift               :  0.0
-      arm_flex               :  0.0
-      arm_roll               :  0.0
-      wrist_flex             : -1.57
-      wrist_roll             :  0.0
-      head_pan               :  0.0
-      head_tilt              :  0.0
-      hand_l_spring_proximal :  0.0
-      # hand_r_spring_proximal :  0.0
+      arm_lift    :  0.0
+      arm_flex    :  0.0
+      arm_roll    : -1.57
+      wrist_flex  : -1.57
+      wrist_roll  :  0.0
+      head_pan    :  0.0
+      head_tilt   :  0.0
+      hand_motor  :  0.0
 
     detecting_pose:
-      arm_lift               :  0.5
-      arm_flex               :  0.0
-      arm_roll               :  0.0
-      wrist_flex             : -1.57
-      wrist_roll             :  0.0
-      head_pan               :  0.0
-      head_tilt              :  -0.3
-      hand_l_spring_proximal :  1.0
-      # hand_r_spring_proximal :  0.0
+      arm_lift    :  0.20
+      arm_flex    :  0.0
+      arm_roll    :  1.57
+      wrist_flex  :  -1.35
+      wrist_roll  :  0.0
+      head_pan    : -0.52
+      head_tilt   : -0.3
+      hand_motor :  0.0
+
+    low_detecting_pose:
+      arm_lift    :  0.15
+      arm_flex    :  0.0
+      arm_roll    : 1.57
+      wrist_flex  : -1.35
+      wrist_roll  :  0.0
+      head_pan    :  -0.52
+      head_tilt   :  -0.55
+      hand_motor  :  0.0
+
+    lowest_detecting_pose:
+      arm_lift    :  0.15
+      arm_flex    :  0.0
+      arm_roll    : 1.57
+      wrist_flex  : -1.35
+      wrist_roll  :  0.0
+      head_pan    :  -0.52
+      head_tilt   :  -0.89
+      hand_motor  :  0.0
+
+    mesurment_pose:
+      arm_lift    :  0.0
+      arm_flex    : -1.0
+      arm_roll    :  3.14
+      wrist_flex  : -0.8
+      wrist_roll  :  0.0
+      head_pan    :  0.0
+      head_tilt   :  -0.2
+      hand_motor  :  0.0
+
+    detecting_box_pose:
+      arm_lift    :  0.15
+      arm_flex    :  0.0
+      arm_roll    :  1.57
+      wrist_flex  : -1.35
+      wrist_roll  :  0.0
+      head_pan    :  0.0
+      head_tilt   :  -0.55
+      hand_motor  :  0.0
