@@ -34,15 +34,19 @@ sudo make install
 
 # Install sigverse_ros_package
 cd $DIR/..
-git clone -b humble-devel https://github.com/SIGVerse/sigverse_ros_package.git
-git clone https://github.com/SIGVerse/rosbridge_suite.git
+git clone -b ${ROS_DISTRO}-devel https://github.com/TeamSOBITS/sigverse_ros_package.git
+git clone -b ${ROS_DISTRO}-devel https://github.com/TeamSOBITS/rosbridge_suite.git
 # Install ROS dependecies
 sudo apt-get update
 sudo apt-get install -y \
     ros-${ROS_DISTRO}-jsk-rviz-plugins \
-    ros-${ROS_DISTRO}-nav2-msgs
+    ros-${ROS_DISTRO}-nav2-msgs \
+    ros-${ROS_DISTRO}-rosbridge_library  #####
 
-cd $DIR
+pip3 install --upgrade pip
+pip3 install tornado
+
+cd ~/colcon_ws/
 colcon build --symlink-install
 
 echo "╚══╣ Install: HSR SIM COMMON (FINISHED) ╠══╝"

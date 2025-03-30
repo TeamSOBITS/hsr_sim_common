@@ -35,7 +35,7 @@ include_directories(include)
 # Library
 add_library(${PROJECT_NAME} SHARED
   src/hsr_sim_joint_action_server.cpp
-  # src/hsr_sim_wheel_action_server.cpp
+  src/hsr_sim_wheel_action_server.cpp
 )
 
 
@@ -43,9 +43,9 @@ rclcpp_components_register_node(${PROJECT_NAME}
   PLUGIN "hsr_sim::JointActionServer"
   EXECUTABLE joint_action_server)
 
-# rclcpp_components_register_node(${PROJECT_NAME}
-#   PLUGIN "hsr_sim::WheelActionServer"
-#   EXECUTABLE wheel_action_server)
+rclcpp_components_register_node(${PROJECT_NAME}
+  PLUGIN "hsr_sim::WheelActionServer"
+  EXECUTABLE wheel_action_server)
 
 
 ament_target_dependencies(${PROJECT_NAME}

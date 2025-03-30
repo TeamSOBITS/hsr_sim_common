@@ -23,16 +23,16 @@ def generate_launch_description():
         output="screen",
     )
 
-    # wheel_action_server_node = Node(
-    #     package="hsr_sim_common",
-    #     executable="wheel_action_server",
-    #     name="wheel_action_server",
-    #     namespace=robot_name,
-    #     output="screen",
-    # )
+    wheel_action_server_node = Node(
+        package="hsr_sim_common",
+        executable="wheel_action_server",
+        name="wheel_action_server",
+        namespace=robot_name,
+        output="screen",
+    )
 
 
     return LaunchDescription([
         joint_action_server_node,
-        # wheel_action_server_node,
+        wheel_action_server_node,
     ])

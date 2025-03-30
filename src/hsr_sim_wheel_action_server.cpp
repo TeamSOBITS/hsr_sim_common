@@ -110,25 +110,19 @@ void WheelActionServer::exe_move_wheel_linear(
 
   double time_allowance = goal->time_allowance.sec + goal->time_allowance.nanosec / 1e9;
   double goal_dist = std::sqrt(std::pow(goal->target_point.x, 2) + std::pow(goal->target_point.y, 2));
-  double curt_dist_x = 0.0;
-  double curt_dist_y = 0.0;
+  double accel_time_rate = 0.4; // TODO parameter file from...
+  double vel_max = goal_dist / ((1 - accel_time_rate)*time_allowance);
+  double accel = goal_dist / ((1 - accel_time_rate)*accel_time_rate*std::pow(time_allowance,2));
+  double inflection_dist = (accel_time_rate*goal_dist) / (2*(1 - accel_time_rate));
+  double curt_dist = 0.0;
   double elapsed_time = 0.0;
   double elapsed_time_last = elapsed_time;
-  double vel_max = 0.3; // TODO parameter file from...
-  double accel, inflection_time;
-  if ((4.*goal_dist/time_allowance) > vel_max) {
-    accel = std::pow(vel_max, 2.) / (vel_max*time_allowance - goal_dist);
-    inflection_time = time_allowance - (goal_dist/vel_max);
-  } else {
-    vel_max = (4*goal_dist) / time_allowance;
-    accel = (8.*goal_dist) / std::pow(time_allowance, 2);
-    inflection_time = time_allowance / 2.;
-  }
+  double sum_xy_vel = 0.0;
 
-  // // Set current time
+  // Set current time
   auto start_time = this->now();
 
-  while (elapsed_time < time_allowance) {
+  while (curt_dist < goal_dist) {
     // Check if the goal has been canceled
     if (goal_handle->is_canceling()) {
       RCLCPP_INFO(this->get_logger(), "Goal has been canceled");
@@ -147,11 +141,11 @@ void WheelActionServer::exe_move_wheel_linear(
     rclcpp::Duration dur_elapsed_time = this->now() - start_time;
     elapsed_time = dur_elapsed_time.nanoseconds() / 1e9; 
 
-    double sum_xy_vel;
+    if (curt_dist <= inflection_dist) sum_xy_vel = accel * elapsed_time;
+    else if ((goal_dist-inflection_dist) < curt_dist) sum_xy_vel = vel_max - accel * (elapsed_time - time_allowance + accel_time_rate*time_allowance);
+    else sum_xy_vel = vel_max;
 
-    if      (elapsed_time <= inflection_time)                   sum_xy_vel = accel * elapsed_time;
-    else if ((time_allowance - inflection_time) < elapsed_time) sum_xy_vel = vel_max - accel * (elapsed_time - time_allowance + inflection_time);
-    else                                                        sum_xy_vel = vel_max;
+    if (sum_xy_vel < 0.) sum_xy_vel = std::abs(sum_xy_vel);
 
     geometry_msgs::msg::Twist out_vel;
     out_vel.linear.x = sum_xy_vel * std::cos(std::atan2(goal->target_point.y, goal->target_point.x));
@@ -159,13 +153,12 @@ void WheelActionServer::exe_move_wheel_linear(
     this->pub_cmd_vel_->publish(out_vel);
 
     // Update the previous error
-    curt_dist_x += out_vel.linear.x * (elapsed_time - elapsed_time_last);
-    curt_dist_y += out_vel.linear.x * (elapsed_time - elapsed_time_last);
+    curt_dist += sum_xy_vel * (elapsed_time - elapsed_time_last);
 
     // Publish feedback
     auto feedback = std::make_shared<MoveWheelLinear::Feedback>();
-    feedback->current_point.x = curt_dist_x;
-    feedback->current_point.y = curt_dist_y;
+    feedback->current_point.x = curt_dist * std::cos(std::atan2(goal->target_point.y, goal->target_point.x));
+    feedback->current_point.y = curt_dist * std::sin(std::atan2(goal->target_point.y, goal->target_point.x));
     feedback->move_time.sec = (this->now() - start_time).seconds();
     feedback->move_time.nanosec = (this->now() - start_time).nanoseconds() % int(10E9);
     goal_handle->publish_feedback(feedback);
@@ -194,25 +187,20 @@ void WheelActionServer::exe_move_wheel_rotate(
   auto result = std::make_shared<MoveWheelRotate::Result>();
 
   double time_allowance = goal->time_allowance.sec + goal->time_allowance.nanosec / 1e9;
-  double goal_rotate = std::abs(goal->target_yaw);
-  double curt_rotate_yaw = 0.0;
+  double goal_yaw = std::abs(goal->target_yaw);
+  double accel_time_rate = 0.4; // TODO parameter file from...
+  double vel_max = goal_yaw / ((1 - accel_time_rate)*time_allowance);
+  double accel = goal_yaw / ((1 - accel_time_rate)*accel_time_rate*std::pow(time_allowance,2));
+  double inflection_yaw = (accel_time_rate*goal_yaw) / (2*(1 - accel_time_rate));
+  double curt_yaw = 0.0;
   double elapsed_time = 0.0;
   double elapsed_time_last = elapsed_time;
-  double vel_max = 1.0; // TODO parameter file from...
-  double accel, inflection_time;
-  if ((4.*goal_rotate/time_allowance) > vel_max) {
-    accel = std::pow(vel_max, 2.) / (vel_max*time_allowance - goal_rotate);
-    inflection_time = time_allowance - (goal_rotate/vel_max);
-  } else {
-    vel_max = (4*goal_rotate) / time_allowance;
-    accel = (8.*goal_rotate) / std::pow(time_allowance, 2);
-    inflection_time = time_allowance / 2.;
-  }
+  double yaw_vel = 0.0;
 
   // // Set current time
   auto start_time = this->now();
 
-  while (elapsed_time < time_allowance) {
+  while (curt_yaw < goal_yaw) {
     // Check if the goal has been canceled
     if (goal_handle->is_canceling()) {
       RCLCPP_INFO(this->get_logger(), "Goal has been canceled");
@@ -229,24 +217,24 @@ void WheelActionServer::exe_move_wheel_rotate(
 
     // Calculate the elapsed time
     rclcpp::Duration dur_elapsed_time = this->now() - start_time;
-    elapsed_time = dur_elapsed_time.nanoseconds() / 1e9; 
+    elapsed_time = dur_elapsed_time.nanoseconds() / 1e9;
 
-    double rotate_vel;
+    if (curt_yaw <= inflection_yaw) yaw_vel = accel * elapsed_time;
+    else if ((goal_yaw-inflection_yaw) < curt_yaw) yaw_vel = vel_max - accel * (elapsed_time - time_allowance + accel_time_rate*time_allowance);
+    else yaw_vel = vel_max;
 
-    if      (elapsed_time <= inflection_time)                   rotate_vel = accel * elapsed_time;
-    else if ((time_allowance - inflection_time) < elapsed_time) rotate_vel = vel_max - accel * (elapsed_time - time_allowance + inflection_time);
-    else                                                        rotate_vel = vel_max;
+    if (yaw_vel < 0.) yaw_vel = std::abs(yaw_vel);
 
     geometry_msgs::msg::Twist out_vel;
-    out_vel.angular.z = (0 < goal->target_yaw) ? rotate_vel : -rotate_vel;
+    out_vel.angular.z = (0<goal->target_yaw) ? (yaw_vel) : (-yaw_vel);
     this->pub_cmd_vel_->publish(out_vel);
 
     // Update the previous error
-    curt_rotate_yaw += out_vel.angular.z * (elapsed_time - elapsed_time_last);
+    curt_yaw += yaw_vel * (elapsed_time - elapsed_time_last);
 
     // Publish feedback
     auto feedback = std::make_shared<MoveWheelRotate::Feedback>();
-    feedback->current_yaw = curt_rotate_yaw;
+    feedback->current_yaw = (0<goal->target_yaw) ? (curt_yaw) : (-curt_yaw);
     feedback->move_time.sec = (this->now() - start_time).seconds();
     feedback->move_time.nanosec = (this->now() - start_time).nanoseconds() % int(10E9);
     goal_handle->publish_feedback(feedback);
