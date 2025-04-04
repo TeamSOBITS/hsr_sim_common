@@ -41,6 +41,7 @@ sudo apt-get update
 sudo apt-get install -y \
     ros-${ROS_DISTRO}-jsk-rviz-plugins \
     ros-${ROS_DISTRO}-nav2-msgs \
+    ros-${ROS_DISTRO}-depth-image-proc \
     ros-${ROS_DISTRO}-rosbridge_library  #####
 
 pip3 install --upgrade pip
