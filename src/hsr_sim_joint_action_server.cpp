@@ -416,7 +416,7 @@ void JointActionServer::serve_move_hand_to_coord(
     return;
   }
   // Inverse kinematics to get the target joint rad
-  std::vector<std::string> target_joint_names = {"arm_lift_joint", "arm_felx_joint", "arm_roll_joint", "wrist_flex_joint", "wrist_roll_joint"};
+  std::vector<std::string> target_joint_names = {"arm_lift_joint", "arm_flex_joint", "arm_roll_joint", "wrist_flex_joint", "wrist_roll_joint"};
   std::vector<double> target_joint_rad = inverse_kinematics(goal_coord);
 
   // If inverse kinematics is outside the range of possible
@@ -464,7 +464,8 @@ void JointActionServer::serve_move_hand_to_tf(
   // Transform the target frame based on the differential tf
   try {
     goal_coord_shift = tf_buffer_->lookupTransform(
-      request->target_frame, request->tf_differential.header.frame_id,
+      // request->target_frame, request->tf_differential.header.frame_id,
+      request->tf_differential.header.frame_id,request->target_frame,
       tf2::TimePointZero);
 
     geometry_msgs::msg::Vector3 euler_target, euler_shift;
@@ -506,7 +507,7 @@ void JointActionServer::serve_move_hand_to_tf(
   }
 
   // Inverse kinematics to get the target joint rad
-  std::vector<std::string> target_joint_names = {"arm_lift_joint", "arm_felx_joint", "arm_roll_joint", "wrist_flex_joint", "wrist_roll_joint"};
+  std::vector<std::string> target_joint_names = {"arm_lift_joint", "arm_flex_joint", "arm_roll_joint", "wrist_flex_joint", "wrist_roll_joint"};
   std::vector<double> target_joint_rad = inverse_kinematics(goal_coord);
 
   // If inverse kinematics is outside the range of possible
