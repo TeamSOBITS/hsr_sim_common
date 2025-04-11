@@ -75,7 +75,8 @@ install(TARGETS ${PROJECT_NAME}
 
 install(DIRECTORY
   config
-  launch DESTINATION share/${PROJECT_NAME}
+  launch 
+  rviz DESTINATION share/${PROJECT_NAME}
 )
 
 install(
