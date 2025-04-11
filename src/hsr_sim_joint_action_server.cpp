@@ -618,7 +618,7 @@ geometry_msgs::msg::TransformStamped JointActionServer::forward_kinematics(
   geometry_msgs::msg::TransformStamped final_coord;
 
   final_coord.transform.translation.x = BaseToArmLengthX + LengthArmLiftToWristFlex * std::sin(-target_joint_rad[1]) + LengthWristFlexToHand;
-  final_coord.transform.translation.y = 0;
+  final_coord.transform.translation.y = 0.078;
   final_coord.transform.translation.z = BaseToArmLiftMin + target_joint_rad[0] + LengthArmLiftToWristFlex * std::cos(-target_joint_rad[1]);
 
   final_coord.transform.rotation.w = 1.;
