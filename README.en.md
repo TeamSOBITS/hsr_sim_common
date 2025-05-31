@@ -8,181 +8,156 @@
 [![Issues][issues-shield]][issues-url]
 [![License][license-shield]][license-url]
 
-# HSR_sim_common
+# hsr_sim_common
 
 <!-- 目次 -->
 <details>
   <summary>Table of Contents</summary>
   <ol>
     <li>
-      <a href="#Introduction">Introduction</a>
+      <a href="#Overview">Overview</a>
     </li>
     <li>
-      <a href="#Set Up">Set Up</a>
+      <a href="#setup">setup</a>
       <ul>
-        <li><a href="#prerequisites">prerequisites</a></li>
-        <li><a href="#installation">installation</a></li>
+        <li><a href="#Environment Requirements">Environment Requirements</a></li>
+        <li><a href="#Installation">Installation</a></li>
       </ul>
     </li>
     <li>
-    　<a href="#launch-and-usage">launch-and-usage</a>
-      <ul>
-        <li><a href="#Launch">Launch</a></li>
-      </ul>
+    　<a href="#Execution and Operation">Execution and Operation</a>
     </li>
     <li>
-    　<a href="#SoftWere">SoftWere</a>
+    　<a href="#Software">Software</a>
       <ul>
-        <li><a href="#Grasp">Grasp</a></li>
-        <li><a href="#Change Pose">Change Pose</a></li>
+        <li><a href="#Point Cloud">Point Cloud</a></li>
+        <li><a href="#Library Server">Library Server</a></li>
+        <li><a href="#Changing Poses">Changing Poses</a></li>
       </ul>
     </li>
-    <li><a href="#milestone">milestone</a></li>
+    <li><a href="#Milestones">Milestones</a></li>
     <!-- <li><a href="#contributing">Contributing</a></li> -->
     <!-- <li><a href="#license">License</a></li> -->
-    <li><a href="#References">References</a></li>
+    <li><a href="#参考文献">参考文献</a></li>
   </ol>
 </details>
 
 
 
 <!-- レポジトリの概要 -->
-## Introduction
+## Overview
 
-This is the package required to run HSR (SIGVerse).
-The mesh and description of the robot are installed here. Object grasping and posing functions are also specified in this package.
-
+This package contains the necessary components for operating the HSR (SIGVerse). It handles the installation of robot meshes and descriptions, and defines functions for object grasping and poses.
 
 <!-- セットアップ -->
-## Set Up
+## Setup
 
 This section describes how to set up this repository.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#readme-top">Back to the Top</a>)</p>
 
 
-### Prerequisites
+### Environment Requirements
 
-First, please set up the following environment before proceeding to the next installation stage.
+First, ensure the following environment is configured before proceeding with the installation steps:
 
 | System  | Version |
 | ------------- | ------------- |
-| Ubuntu | 20.04 (Focal Fossa) |
-| ROS | Noetic Ninjemys |
-| Python | 3.8 |
+| Ubuntu | 22.04 (Jammy Jellyfish) |
+| ROS | Humble Hawksbill |
+| Python | 3.0~ |
 
-> [!NOTE]
-> If you need to install `Ubuntu` or `ROS`, please check our [SOBITS Manual](https://github.com/TeamSOBITS/sobits_manual#%E9%96%8B%E7%99%BA%E7%92%B0%E5%A2%83%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6).
-
-
-<p align="right">(<a href="#readme-top">Back to top</a>)</p>
+<p align="right">(<a href="#readme-top">Back to the Top</a>)</p>
 
 
 ### Installation
 
-1. Go to the `src` folder of ROS.
+1. Clone the hsr_sim_common package using the following commands
    ```sh
-   $ roscd
-   # Or just use "cd ~/catkin_ws/" and change directory.
-   $ cd src/
+   cd ~/colcon_ws/src/
    ```
-2. Clone this repository.
    ```sh
-   $ git clone https://github.com/TeamSOBITS/hsr_sim_common
+   git clone -b humble-devel https://github.com/TeamSOBITS/hsr_sim_common.git
    ```
-3. Navigate into the repository.
+2. Install the dependencies using install.sh. This primarily includes:
+   - Mongo C driver
+     - Necessary for controlling the HSR in the SIGVerse environment using Mongo.
+     - Mongo is a popular NoSQL document-oriented database.
+   - Mongo C++ driver
+     - Installs the C++ driver similarly.
+   - sigverse_ros_bridge setup
+     - Installed to bridge SIGVerse on Windows and ROS 2 on Ubuntu.
    ```sh
-   $ cd hsr_sim_common/
+   cd hsr_sim_common
    ```
-4. Install the dependent packages.
    ```sh
-   $ bash install.sh
+   bash install.sh
    ```
+3. Then, build the colcon workspace
+   ```sh
+   cd ~/colcon_ws/
+   ```
+   ```sh
+   colcon build
+   ```
+<p align="right">(<a href="#readme-top">Back to the Top</a>)</p>
 
-    ```bash:
-    $ roscd hsr_sim_common
-    $ chmod 755 install.sh
-    $ sudo ./install.sh
-    ```
-
-5. Compile the package.
-   ```sh
-   $ roscd
-   # Or just use "cd ~/catkin_ws/" and change directory.
-   $ catkin_make
-   ```
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- 実行・操作方法 -->
-## Launch and Usage
-
-1. Set the parameters inside[minimal.launch](hsr_sim_common/launch/minimal.launch)and select the functions to launch with HSR
-   ```xml
-    roslaunch hsr_sim_common minimal.launch
-    ...
+## Execution and Operation
+After connecting to SIGVerse, execute [minimal.launch.py](launch/minimal.launch.py).
+   ```sh
+    ros2 launch hsr_sim_common minimal.launch.py
    ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#readme-top">Back to the Top</a>)</p>
 
 
 ## Software
 
-### Grasp
-Please refer to `grasp.py` located in the `example` folder.
+### Point Cloud
+- You can publish point clouds by launching [generate_pointcloud.launch.py](launch/generate_pointcloud.launch.py).
+- This file is automatically executed when [minimal.launch.py](launch/minimal.launch.py) is run.
 
-#### Function Descriptions
+### Library Server
+- Launching [library_server.launch.py](launch/library_server.launch.py) starts an Action Server for exchanging information related to changing poses, horizontal movement, rotation, altering individual joint angles, and moving the hand to a specified TF.
+- This file is also automatically executed when [minimal.launch.py](launch/minimal.launch.py) is run.
 
-1. `grasp_to_target_coord`
-   - A function that allows HSR to grasp an object located at the specified 3D coordinates.
-
-2. `open_gripper`
-   - A function to open the gripper.
-
-3. `close_gripper`
-   - A function to close the gripper.
-
-*Additional examples will be added as needed.*
-
-### Changing Pose
-By calling the functions in `joint_controller.py` (`hsr_sim_common/src`) of the `hsr_sim_common` package, you can change the HSR to the following poses.
+### Changing Poses
+- You can modify the available poses by editing [pose_list.yaml](config/pose_list.yaml).
 
 <div align="center">
  <p>
-    <img src="hsr_sim_common/img/initial.png" title="initial_pose" width="280">
-    <img src="hsr_sim_common/img/detect.png" title="detecting_pose" width="280"> 
-    <img src="hsr_sim_common/img/measure.png" title="measurement_pose" width="280"> 
+    <img src="img/initial.png" title="initial_pose" width="280">
+    <img src="img/detect.png" title="detecting_pose" width="280"> 
+    <img src="img/measure.png" title="measurement_pose" width="280"> 
  </p>
 </div>
 
-#### ①initial_pose
-   - Purpose: Used when performing autonomous movement.
-   - Description: A pose that ensures the arm does not collide during movement.
-   - Function Name: `move_to_initial_pose` (`joint_controller.py`)
+From left to right:
 
-#### ②detecting_pose
-   - Purpose: Used when performing object recognition.
-   - Description: A pose that ensures the arm does not appear within the camera frame during object recognition.
-   - Function Name: `move_to_detecting_pose` (`joint_controller.py`)
+#### ①initial_pose  
+Purpose: Used for autonomous navigation.
+Description: A posture that prevents the arm from colliding during movement.
 
-#### ③measurement_pose
-   - Purpose: Used when measuring the height of an object.
-   - Description: This pose allows for the measurement of object height, enabling safe object placement.
-   - Function Name: `move_to_measurement_pose` (`joint_controller.py`)
+#### ②detecting_pose  
+Purpose: Used for object recognition.
+Description: A posture that ensures the arm does not appear in the camera's frame during object recognition.
 
-<p align="right">(<a href="#readme-top">Back to top</a>)</p>
+#### ③measurement_pose  
+Purpose: Used for measuring object height.
+Description: This posture allows the robot to determine an object's height, enabling safe object placement.
 
-<!-- Milestones -->
+
+<p align="right">(<a href="#readme-top">Back to the Top</a>)</p>
+
+
+<!-- マイルストーン -->
 ## Milestones
 
-- [x] Modify example files
-- [x] OSS
-    - [x] Enhance documentation
-    - [x] Unify coding style
+Please check the [Issue page][issues-url] to view current bugs and requests for new features.
 
-To check the current bugs and new feature requests, please refer to the [Issue page][issues-url].
-
-<p align="right">(<a href="#readme-top">Back to top</a>)</p>
+<p align="right">(<a href="#readme-top">Back to the Top</a>)</p>
 
 
 <!-- CONTRIBUTING -->
