@@ -26,13 +26,12 @@
     </li>
     <li>
     　<a href="#実行操作方法">実行・操作方法</a>
-      <ul>
-        <li><a href="#Launchの起動">Launchの起動</a></li>
-      </ul>
     </li>
     <li>
     　<a href="#ソフトウェア">ソフトウェア</a>
       <ul>
+        <li><a href="#点群">点群</a></li>
+        <li><a href="#ライブラリサーバー">ライブラリサーバー</a></li>
         <li><a href="#ポーズの変更">ポーズの変更</a></li>
       </ul>
     </li>
