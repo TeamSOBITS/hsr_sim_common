@@ -38,7 +38,7 @@
     <li><a href="#マイルストーン">マイルストーン</a></li>
     <!-- <li><a href="#contributing">Contributing</a></li> -->
     <!-- <li><a href="#license">License</a></li> -->
-    <li><a href="#参考文献">参考文献</a></li>
+    <!-- <li><a href="#参考文献">参考文献</a></li> -->
   </ol>
 </details>
 
@@ -140,18 +140,14 @@ SIGVerseと接続後，[minimal.launch.py](launch/minimal.launch.py)を実行し
 #### ①initial_pose  
 用途：自律移動をする際に用いるpose(姿勢)  
 説明：アームが移動中に衝突しないようにする姿勢  
-関数名：move_to_initial_pose（joint_controller.py） 
 
 #### ②detecting_pose  
 用途：物体認識の際に用いるpose(姿勢)  
 説明：物体を認識する際に，カメラのフレーム内にアームが映らないようにする姿勢  
-関数名：move_to_detecting_pose（joint_controller.py） 
 
 #### ③measurement_pose  
 用途：物体の高さを計測する際に用いるpose(姿勢)  
 説明：この姿勢を用いることで，物体の高さを求めることができ，安全な物体の配置が可能  
-関数名：move_to_measurement_pose（joint_controller.py）  
-
 
 <p align="right">(<a href="#readme-top">上に戻る</a>)</p>
 
