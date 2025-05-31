@@ -108,7 +108,7 @@
 <!-- 実行・操作方法 -->
 ## 実行・操作方法
 
-[minimal.launch.py](hsr_sim_common/launch/minimal.launch.py)を実行してHSRを起動します．
+[minimal.launch.py](launch/minimal.launch.py)を実行してHSRを起動します．
    ```sh
     ros2 launch hsr_sim_common minimal.launch.py
    ```
@@ -119,15 +119,15 @@
 ## ソフトウェア
 
 ### 点群
-- [generate_pointcloud.launch.py](hsr_sim_common/launch/generate_pointcloud.launch.py)を起動することで点群をパブリッシュできます．
-- このファイルは[minimal.launch.py](hsr_sim_common/launch/minimal.launch.py)の実行で自動的に実行されます．
+- [generate_pointcloud.launch.py](launch/generate_pointcloud.launch.py)を起動することで点群をパブリッシュできます．
+- このファイルは[minimal.launch.py](launch/minimal.launch.py)の実行で自動的に実行されます．
 
 ### ライブラリサーバー
 - [library_server.launch.py](launch/library_server.launch.py)を起動することで，ポーズの変更，水平移動，回転，各関節角の変更，指定したTFまでハンドを移動させるための情報などをAction通信でやりとりできます．
-- このファイルは[minimal.launch.py](hsr_sim_common/launch/minimal.launch.py)の実行で自動的に実行されます．
+- このファイルは[minimal.launch.py](launch/minimal.launch.py)の実行で自動的に実行されます．
 
 ### ポーズの変更
-- [pose_list.yaml](hsr_sim_common/config/pose_list.yaml)を書き換えることで，利用可能なポーズを変更することができます．
+- [pose_list.yaml](config/pose_list.yaml)を書き換えることで，利用可能なポーズを変更することができます．
 <div align="center">
  <p>
     <img src="img/initial.png" title="initial_pose" width="280">
