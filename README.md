@@ -33,7 +33,6 @@
     <li>
     　<a href="#ソフトウェア">ソフトウェア</a>
       <ul>
-        <li><a href="#物体把持">物体把持</a></li>
         <li><a href="#ポーズの変更">ポーズの変更</a></li>
       </ul>
     </li>
@@ -67,65 +66,52 @@
 
 | System  | Version |
 | ------------- | ------------- |
-| Ubuntu | 20.04 (Focal Fossa) |
-| ROS | Noetic Ninjemys |
-| Python | 3.8 |
-
-> [!NOTE]
-> `Ubuntu`や`ROS`のインストール方法に関しては，[SOBITS Manual](https://github.com/TeamSOBITS/sobits_manual#%E9%96%8B%E7%99%BA%E7%92%B0%E5%A2%83%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6)に参照してください．
+| Ubuntu | 22.04 (Jammy Jellyfish) |
+| ROS | Humble Hawksbill |
+| Python | 3.0~ |
 
 <p align="right">(<a href="#readme-top">上に戻る</a>)</p>
 
 
 ### インストール方法
 
-1. ROSの`src`フォルダに移動します．
+1. 以下のコマンドでhsr_sim_commonパッケージをcloneします．
    ```sh
-   $ roscd
-   # もしくは，"cd ~/catkin_ws/"へ移動．
-   $ cd src/
+   cd ~/colcon_ws/src/
    ```
-2. 本レポジトリをcloneします．
    ```sh
-   $ git clone https://github.com/TeamSOBITS/hsr_sim_common
+   git clone -b humble-devel https://github.com/TeamSOBITS/hsr_sim_common.git
    ```
-3. レポジトリの中へ移動します．
+2. install.shで依存関係をインストールします．主に以下が含まれています．
+   - Mongo C driver
+     - SIGVerse環境でHSRを制御するにはMongoを用いる必要があります．
+     - Mongoとは，代表的なNoSQLデータベース・ドキュメント指向型データベースのことです．
+   - Mongo C++ driver
+     - 同様にしてC++用のドライバもインストールします．
+   - sigverse_ros_bridgeの設定
+     - Windows側のSIGVerseとUbuntu側のROS2をbridgeするためにインストールします．
    ```sh
-   $ cd /hsr_sim_common
+   cd hsr_sim_common
    ```
-4. 依存パッケージをインストールします．
    ```sh
-   $ bash install.sh
+   bash install.sh
    ```
-   以下のコマンドを入力して，HSRを動かすための環境設定を行います．  
-   この設定は，初回のみに行う作業ですので，1度行ったことのある人は飛ばしてください．
-
-    ```bash:
-    $ roscd hsr_sim_common
-    $ chmod 755 install.sh
-    $ sudo ./install.sh
-
-    $ roscd hsr_sim_common/src
-    $ chmod 755 *
-    ```
-
-5. パッケージをコンパイルします．
+3. colcon buildします
    ```sh
-   $ roscd
-   # もしくは，"cd ~/catkin_ws/"へ移動．
-   $ catkin_make
+   cd ~/colcon_ws/
    ```
-
+   ```sh
+   colcon build
+   ```
 <p align="right">(<a href="#readme-top">上に戻る</a>)</p>
 
 
 <!-- 実行・操作方法 -->
 ## 実行・操作方法
 
-1. HSRの起動する機能をパラメータとして[minimal.launch](hsr_sim_common/launch/minimal.launch)に設定します．
-   ```xml
-    roslaunch hsr_sim_common minimal.launch
-    ...
+[minimal.launch.py](hsr_sim_common/launch/minimal.launch.py)を実行してHSRを起動します．
+   ```sh
+    ros2 launch hsr_sim_common minimal.launch.py
    ```
 
 <p align="right">(<a href="#readme-top">上に戻る</a>)</p>
@@ -133,24 +119,16 @@
 
 ## ソフトウェア
 
-### 物体把持
-exampleフォルダに入ってある, grasp.pyを参照してください.
+### 点群
+- [generate_pointcloud.launch.py](hsr_sim_common/launch/generate_pointcloud.launch.py)を起動することで点群をパブリッシュできます．
+- このファイルは[minimal.launch.py](hsr_sim_common/launch/minimal.launch.py)の実行で自動的に実行されます．
 
-#### 関数の説明
-
-1. grasp_to_target_coord
-指定した3次元座標に存在する物体をHSRが把持する関数
-
-2. open_gripper
-グリッパーを開く関数
-
-3. close_gripper
-グリッパーを閉じる関数
-
-※ exampleに関しては随時追加予定です。
+### ライブラリサーバー
+- [library_server.launch.py](launch/library_server.launch.py)を起動することで，ポーズの変更，水平移動，回転，各関節角の変更，指定したTFまでハンドを移動させるための情報などをAction通信でやりとりできます．
+- このファイルは[minimal.launch.py](hsr_sim_common/launch/minimal.launch.py)の実行で自動的に実行されます．
 
 ### ポーズの変更
-hsr_sim_commonパッケージのjoint_controller.py(hsr_sim_common/src)の関数を呼び出すことでHSRを以下のようなPose（姿勢）にすることができます.
+- [pose_list.yaml](hsr_sim_common/config/pose_list.yaml)を書き換えることで，利用可能なポーズを変更することができます．
 <div align="center">
  <p>
     <img src="img/initial.png" title="initial_pose" width="280">
@@ -182,11 +160,6 @@ hsr_sim_commonパッケージのjoint_controller.py(hsr_sim_common/src)の関数
 
 <!-- マイルストーン -->
 ## マイルストーン
-
-- [x] exampleファイルの修正
-- [x] OSS
-    - [x] ドキュメンテーションの充実
-    - [x] コーディングスタイルの統一
 
 現時点のバッグや新規機能の依頼を確認するために[Issueページ][issues-url] をご覧ください．
 
