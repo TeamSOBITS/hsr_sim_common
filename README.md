@@ -122,7 +122,7 @@ SIGVerseと接続後，[minimal.launch.py](launch/minimal.launch.py)を実行し
 - このファイルは[minimal.launch.py](launch/minimal.launch.py)の実行で自動的に実行されます．
 
 ### ライブラリサーバー
-- [library_server.launch.py](launch/library_server.launch.py)を起動することで，ポーズの変更，水平移動，回転，各関節角の変更，指定したTFまでハンドを移動させるための情報などをAction通信でやりとりできます．
+- [library_server.launch.py](launch/library_server.launch.py)を起動することで，ポーズの変更，水平移動，回転，各関節角の変更，指定したTFまでハンドを移動させるための情報などをやりとりするためのAction Serverが起動します．
 - このファイルは[minimal.launch.py](launch/minimal.launch.py)の実行で自動的に実行されます．
 
 ### ポーズの変更
