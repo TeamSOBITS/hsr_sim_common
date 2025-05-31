@@ -18,7 +18,7 @@
       <a href="#Overview">Overview</a>
     </li>
     <li>
-      <a href="#setup">setup</a>
+      <a href="#Setup">Setup</a>
       <ul>
         <li><a href="#Environment Requirements">Environment Requirements</a></li>
         <li><a href="#Installation">Installation</a></li>
