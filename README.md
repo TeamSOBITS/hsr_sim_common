@@ -107,8 +107,7 @@
 
 <!-- 実行・操作方法 -->
 ## 実行・操作方法
-
-[minimal.launch.py](launch/minimal.launch.py)を実行してHSRを起動します．
+SIGVerseと接続後，[minimal.launch.py](launch/minimal.launch.py)を実行します．
    ```sh
     ros2 launch hsr_sim_common minimal.launch.py
    ```
