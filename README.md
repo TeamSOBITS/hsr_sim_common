@@ -18,7 +18,7 @@
       <a href="#概要">概要</a>
     </li>
     <li>
-      <a href="#セットアップ">セットアップ</a>
+      <a href="#環境構築">環境構築</a>
       <ul>
         <li><a href="#環境条件">環境条件</a></li>
         <li><a href="#インストール方法">インストール方法</a></li>
@@ -51,8 +51,8 @@
 ロボットのmeshやdiscriptionはここでinstallします．また物体把持やポーズの関数もこのパッケージで指定しています．
 
 
-<!-- セットアップ -->
-## セットアップ
+<!-- 環境構築 -->
+## 環境構築
 
 ここで，本レポジトリのセットアップ方法について説明します．
 
@@ -197,4 +197,3 @@ Distributed under the MIT License. See `LICENSE.txt` for more NOTErmation.
 [issues-url]: https://github.com/TeamSOBITS/hsr_sim_common/issues
 [license-shield]: https://img.shields.io/github/license/TeamSOBITS/hsr_sim_common.svg?style=for-the-badge
 [license-url]: LICENSE
-
