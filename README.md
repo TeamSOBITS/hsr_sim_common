@@ -8,7 +8,7 @@
 [![Issues][issues-shield]][issues-url]
 [![License][license-shield]][license-url]
 
-# hsr_sim_common
+# HSR Sim Common
 
 <!-- 目次 -->
 <details>
