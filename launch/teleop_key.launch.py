@@ -8,10 +8,10 @@ from ament_index_python.packages import get_package_share_directory
 import os
 
 def generate_launch_description():
-    pub_base_twist_topic_name = LaunchConfiguration('pub_base_twist_topic_name', default='/omni_base_controller/cmd_vel')
-    pub_head_trajectory_topic_name = LaunchConfiguration('pub_arm_trajectory_topic_name', default='/head_trajectory_controller/joint_trajectory')
-    pub_arm_trajectory_topic_name = LaunchConfiguration('pub_arm_trajectory_topic_name', default='/arm_trajectory_controller/joint_trajectory')
-    pub_gripper_trajectory_topic_name = LaunchConfiguration('pub_gripper_trajectory_topic_name', default='/gripper_controller/joint_trajectory')
+    pub_base_twist_topic_name = LaunchConfiguration('pub_base_twist_topic_name', default='/hsrb/command_velocity')
+    pub_head_trajectory_topic_name = LaunchConfiguration('pub_arm_trajectory_topic_name', default='/hsrb/head_trajectory_controller/command')
+    pub_arm_trajectory_topic_name = LaunchConfiguration('pub_arm_trajectory_topic_name', default='/hsrb/arm_trajectory_controller/command')
+    pub_gripper_trajectory_topic_name = LaunchConfiguration('pub_gripper_trajectory_topic_name', default='/hsrb/gripper_controller/command')
 
     teleop_key_node = Node(
         package='hsr_sim_common',
