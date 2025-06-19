@@ -137,9 +137,9 @@ First, ensure the following environment is configured before proceeding with the
   
   | | | |
   |---|---| --- |
-  | | ↑ (A) | |
-  | ← (D) |  | → (C) |
-  | | ↓ (B) | |
+  | | ↑ | |
+  | ← |  | → |
+  | | ↓ | |
   
 - Speed Adjustment and Joint Operations
   - q / z: Increase / decrease max speeds by 10%
