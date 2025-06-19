@@ -1,6 +1,6 @@
 <a name="readme-top"></a>
 
-[JA](README.md) | [EN](README.en.md)
+[JP](README.md) | [EN](README.en.md)
 
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
@@ -15,27 +15,27 @@
   <summary>Table of Contents</summary>
   <ol>
     <li>
-      <a href="#Overview">Overview</a>
+      <a href="#introduction">Introduction</a>
     </li>
     <li>
-      <a href="#Setup">Setup</a>
+      <a href="#getting-started">Getting Started</a>
       <ul>
-        <li><a href="#Environment Requirements">Environment Requirements</a></li>
-        <li><a href="#Installation">Installation</a></li>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
     <li>
-    　<a href="#Execution and Operation">Execution and Operation</a>
+    　<a href="#launch-and-usage">Launch and Usage</a>
     </li>
     <li>
-    　<a href="#Software">Software</a>
+    　<a href="#software">Software</a>
       <ul>
-        <li><a href="#Point Cloud">Point Cloud</a></li>
-        <li><a href="#Library Server">Library Server</a></li>
-        <li><a href="#Changing Poses">Changing Poses</a></li>
+        <li><a href="#point-cloud">Point Cloud</a></li>
+        <li><a href="#library-server">Library Server</a></li>
+        <li><a href="#changing-poses">Changing Poses</a></li>
       </ul>
     </li>
-    <li><a href="#Milestones">Milestones</a></li>
+    <li><a href="#milestones">Milestones</a></li>
     <!-- <li><a href="#contributing">Contributing</a></li> -->
     <!-- <li><a href="#license">License</a></li> -->
      <!-- <li><a href="#参考文献">参考文献</a></li> -->
@@ -45,19 +45,19 @@
 
 
 <!-- レポジトリの概要 -->
-## Overview
+## Introduction
 
 This package contains the necessary components for operating the HSR (SIGVerse). It handles the installation of robot meshes and descriptions, and defines functions for object grasping and poses.
 
 <!-- セットアップ -->
-## Setup
+## Getting Started
 
 This section describes how to set up this repository.
 
 <p align="right">(<a href="#readme-top">Back to the Top</a>)</p>
 
 
-### Environment Requirements
+### Prerequisites
 
 First, ensure the following environment is configured before proceeding with the installation steps:
 
@@ -104,11 +104,56 @@ First, ensure the following environment is configured before proceeding with the
 
 
 <!-- 実行・操作方法 -->
-## Execution and Operation
-After connecting to SIGVerse, execute [minimal.launch.py](launch/minimal.launch.py).
+## Launch and Usage
+1. After connecting to SIGVerse, execute [`minimal.launch.py`](launch/minimal.launch.py).
    ```sh
     ros2 launch hsr_sim_common minimal.launch.py
    ```
+2. You can control the robot by launching [teleop_key.launch.py](launch/teleop_key.launch.py)．
+   ```sh
+   ros2 launch hsr_sim_common teleop_key.launch.py
+   ```
+  <details>
+    <summary>Keyboard Control Method</summary>
+    
+- Moving around
+    
+  | | | |
+  |---|---|---|
+  | u | i | o |
+  | j | k | l |
+  | m | , | . |
+  
+- For Holonomic mode (strafing)
+  - Hold down the shift key
+  
+  | | | |
+  |---|---|---|
+  | U | I | O |
+  | J | K | L |
+  | M | < | > |
+  
+- Simple Teleoperation with arrow keys
+  
+  | | | |
+  |---|---| --- |
+  | | ↑ (A) | |
+  | ← (D) |  | → (C) |
+  | | ↓ (B) | |
+  
+- Speed Adjustment and Joint Operations
+  - q / z: Increase / decrease max speeds by 10%
+  - w / x: Increase / decrease linear speed only by 10%
+  - e / c: Increase / decrease angular speed only by 10%
+  - a + arrow keys: Control arm_lift_joint
+  - s + arrow keys: Control arm_flex_joint and arm_roll_joint
+  - d + arrow keys: Control wrist_flex_joint and wrist_roll_joint
+  - f + arrow keys: Control head_pan_joint and head_tilt_joint
+  - y + arrow keys: Control linear_x, linear_y, and angular_z
+  - g: Toggle hand open/close
+  - h: Move to initial pose
+
+  </details>
 
 <p align="right">(<a href="#readme-top">Back to the Top</a>)</p>
 
