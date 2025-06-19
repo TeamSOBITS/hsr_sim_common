@@ -1,6 +1,6 @@
 <a name="readme-top"></a>
 
-[JA](README.md) | [EN](README.en.md)
+[JP](README.md) | [EN](README.en.md)
 
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
@@ -18,7 +18,7 @@
       <a href="#概要">概要</a>
     </li>
     <li>
-      <a href="#環境構築">環境構築</a>
+      <a href="#セットアップ">セットアップ</a>
       <ul>
         <li><a href="#環境条件">環境条件</a></li>
         <li><a href="#インストール方法">インストール方法</a></li>
@@ -51,8 +51,8 @@
 ロボットのmeshやdiscriptionはここでinstallします．また物体把持やポーズの関数もこのパッケージで指定しています．
 
 
-<!-- 環境構築 -->
-## 環境構築
+<!-- セットアップ -->
+## セットアップ
 
 ここで，本レポジトリのセットアップ方法について説明します．
 
@@ -107,10 +107,55 @@
 
 <!-- 実行・操作方法 -->
 ## 実行・操作方法
-SIGVerseと接続後，[minimal.launch.py](launch/minimal.launch.py)を実行します．
+1. SIGVerseと接続後，[minimal.launch.py](launch/minimal.launch.py)を実行します．
    ```sh
     ros2 launch hsr_sim_common minimal.launch.py
    ```
+2. [teleop_key.launch.py](launch/teleop_key.launch.py)を起動することで，ロボットを操作できます．
+   ```sh
+   ros2 launch hsr_sim_common teleop_key.launch.py
+   ```
+  <details>
+    <summary>キーボード操作方法</summary>
+    
+- 移動操作 (通常モード)
+    
+  | | | |
+  |---|---|---|
+  | u | i | o |
+  | j | k | l |
+  | m | , | . |
+  
+- ホロノミックモード (横移動)
+  - シフトキーを押しながら操作すると、横移動 (strafing) ができます。
+  
+  | | | |
+  |---|---|---|
+  | U | I | O |
+  | J | K | L |
+  | M | < | > |
+  
+- 矢印キーでのシンプルなテレポート操作
+  
+  | | | |
+  |---|---| --- |
+  | | ↑ (A) | |
+  | ← (D) |  | → (C) |
+  | | ↓ (B) | |
+  
+- 速度調整と関節操作
+  - q / z: 最大速度を10%ずつ増減
+  - w / x: リニア速度（直線移動速度）のみを10%ずつ増減
+  - e / c: 角速度（回転速度）のみを10%ずつ増減
+  - a + 矢印キー: arm_lift_joint を操作
+  - s + 矢印キー: arm_flex_joint と arm_roll_joint を操作
+  - d + 矢印キー: wrist_flex_joint と wrist_roll_joint を操作
+  - f + 矢印キー: head_pan_joint と head_tilt_joint を操作
+  - y + 矢印キー: linear_x と linear_y と angular_z を操作
+  - g: ハンドの開閉を切り替え
+  - h: 初期姿勢へ移動
+
+  </details>
 
 <p align="right">(<a href="#readme-top">上に戻る</a>)</p>
 
