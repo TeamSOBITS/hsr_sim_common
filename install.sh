@@ -6,8 +6,8 @@ echo "╔══╣ Install: HSR SIM COMMON (STARTING) ╠══╗"
 DIR=$(pwd)
 
 cd $DIR/..
-git clone -b ${ROS_DISTRO}-devel https://github.com/TeamSOBITS/sobits_msgs.git
-cd sobits_msgs
+git clone -b ${ROS_DISTRO}-devel https://github.com/TeamSOBITS/sobits_interfaces.git
+cd sobits_interfaces
 bash install.sh
 cd $DIR
 
