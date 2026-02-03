@@ -45,7 +45,7 @@ sudo apt-get install -y \
     ros-${ROS_DISTRO}-nav2-msgs \
     ros-${ROS_DISTRO}-depth-image-proc \
     ros-${ROS_DISTRO}-rosbridge-library 
-sudo apt install xterm
+sudo apt install -y xterm
 
 pip3 install --upgrade pip
 pip3 install tornado
