@@ -36,8 +36,8 @@ sudo make install
 cd $DIR/..
 git clone -b ${ROS_DISTRO}-devel https://github.com/TeamSOBITS/sigverse_ros_package.git
 git clone -b ${ROS_DISTRO}-devel https://github.com/TeamSOBITS/rosbridge_suite.git
-git clone -b ${ROS_DISTRO} https://github.com/hsr-project/hsrb_description.git
-git clone -b ${ROS_DISTRO} https://github.com/hsr-project/hsrb_meshes.git
+git clone -b humble https://github.com/hsr-project/hsrb_description.git
+git clone -b humble https://github.com/hsr-project/hsrb_meshes.git
 
 # Install ROS dependecies
 sudo apt-get update
@@ -48,6 +48,6 @@ sudo apt-get install -y \
 sudo apt install -y xterm
 
 pip3 install --upgrade pip
-pip3 install tornado
+pip3 install tornado --break-system-packages
 
 echo "╚══╣ Install: HSR SIM COMMON (FINISHED) ╠══╝"
