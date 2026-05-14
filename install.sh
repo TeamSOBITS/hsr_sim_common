@@ -35,7 +35,7 @@ sudo make install
 # Install sigverse_ros_package
 cd $DIR/..
 git clone -b ${ROS_DISTRO}-devel https://github.com/TeamSOBITS/sigverse_ros_package.git
-git clone -b ${ROS_DISTRO}-devel https://github.com/TeamSOBITS/rosbridge_suite.git
+git clone -b humble https://github.com/TeamSOBITS/rosbridge_suite.git
 git clone -b humble https://github.com/hsr-project/hsrb_description.git
 git clone -b humble https://github.com/hsr-project/hsrb_meshes.git
 
