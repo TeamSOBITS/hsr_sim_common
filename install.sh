@@ -46,7 +46,7 @@ sudo apt install -y xterm
 
 sudo apt-get install -y --only-upgrade ros-${ROS_DISTRO}-fastcdr
 
-pip3 install --upgrade pip
+pip3 install --upgrade pip --break-system-packages
 pip3 install tornado --break-system-packages
 
 echo "╚══╣ Install: HSR SIM COMMON (FINISHED) ╠══╝"
