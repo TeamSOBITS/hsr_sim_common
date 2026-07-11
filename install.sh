@@ -32,7 +32,6 @@ cd $DIR
 # Install sigverse_ros_package
 cd $DIR/..
 git clone -b ${ROS_DISTRO}-devel https://github.com/TeamSOBITS/sigverse_ros_package.git
-git clone -b humble https://github.com/TeamSOBITS/rosbridge_suite.git
 git clone -b humble https://github.com/hsr-project/hsrb_description.git
 git clone -b humble https://github.com/hsr-project/hsrb_meshes.git
 
@@ -41,8 +40,11 @@ sudo apt-get update
 sudo apt-get install -y \
     ros-${ROS_DISTRO}-nav2-msgs \
     ros-${ROS_DISTRO}-depth-image-proc \
-    ros-${ROS_DISTRO}-rosbridge-library 
+    ros-${ROS_DISTRO}-rosbridge-library \
+    ros-${ROS_DISTRO}-rosbridge-server
 sudo apt install -y xterm
+
+sudo apt-get install -y --only-upgrade ros-${ROS_DISTRO}-fastcdr
 
 pip3 install --upgrade pip
 pip3 install tornado --break-system-packages
